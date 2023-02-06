@@ -56,7 +56,6 @@ def pil_loader(path):
     with open(path, 'rb') as f:
         img = Image.open(f)
         img = img.convert('RGB')
-        print(img.size)
         return img
 
 to_tensor = T.PILToTensor()

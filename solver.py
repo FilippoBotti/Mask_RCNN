@@ -61,7 +61,7 @@ class Solver(object):
             running_loss = 0.0
             # start timer and carry out training and validation
             start = time.time()
-            print('Training')
+            print('Solver Training')
             train_loss_list = []
             
             # initialize tqdm progress bar

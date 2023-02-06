@@ -47,21 +47,21 @@ class ModaNetDataset(torch.utils.data.Dataset):
         boxes = []
         labels = []
         mask = []
-        #img = img.resize((self.width, self.height))
+        img = img.resize((self.width, self.height))
 
         for ann in img_anns:
             current_mask = self.annotations.annToMask(ann)
             current_mask= (current_mask > 0).astype(np.uint8)
-            #current_mask = cv2.resize(current_mask, (self.width, self.height), cv2.INTER_LINEAR)
+            current_mask = cv2.resize(current_mask, (self.width, self.height), cv2.INTER_LINEAR)
             mask.append(current_mask)
             xmin = int(ann['bbox'][0])
             ymin = int(ann['bbox'][1])
             xmax = xmin+int(ann['bbox'][2])
             ymax = ymin+int(ann['bbox'][3])
-            xmin_final = (xmin/1)*1
-            xmax_final = (xmax/1)*1
-            ymin_final = (ymin/1)*1
-            ymax_final = (ymax/1)*1
+            xmin_final = (xmin/image_width)*self.width
+            xmax_final = (xmax/image_width)*self.width
+            ymin_final = (ymin/image_height)*self.height
+            ymax_final = (ymax/image_height)*self.height
             boxes.append([xmin_final, ymin_final, xmax_final, ymax_final])
             labels.append(ann['category_id'])
 
