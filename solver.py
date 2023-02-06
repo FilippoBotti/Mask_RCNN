@@ -116,7 +116,7 @@ class Solver(object):
                         epoch * len(self.train_loader) + i)
                     for loss in dict:
                         self.writer.add_scalar(loss,
-                        dict[loss].item() / self.args.print_every,
+                        dict[loss]/ self.args.print_every,
                         epoch * len(self.train_loader) + i)
                     
                     
