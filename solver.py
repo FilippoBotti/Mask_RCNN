@@ -134,6 +134,8 @@ class Solver(object):
             #val_loss = validate(self.valid_loader, self.net, self.optimizer, self.device)
             print(f"Epoch #{epoch+1} train loss: {sum(train_loss_list)//len(self.train_loader):.3f}")   
             print(f"Epoch #{epoch+1} validation loss: {sum(val_loss)//len(self.valid_loader):.3f}")   
+            self.writer.add_scalar('validation loss',
+                        val_loss,epoch)
             end = time.time()
             print(f"Took {((end - start) / 60):.3f} minutes for epoch {epoch}")
             # save the current epoch model
@@ -160,10 +162,10 @@ class Solver(object):
             with torch.no_grad():
                 loss_dict = self.net(images, targets)
             losses = sum(loss for loss in loss_dict.values())
-            loss_value = losses.item()
+            loss_value += losses.item()
             val_loss_list.append(loss_value)
             val_itr += 1
             # update the loss value beside the progress bar for each iteration
             prog_bar.set_description(desc=f"Loss: {loss_value:.4f}\n\n")
         self.net.train()
-        return val_loss_list
+        return loss_value/i
