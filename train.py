@@ -91,7 +91,7 @@ def main(args):
     # # params = [p for p in model.parameters() if p.requires_grad]
     # # optimizer = torch.optim.AdamW(params=model.parameters(), lr=1e-5)
 
-    device = torch.device("cuda")
+    device = torch.device("cpu")
     # print("Device: ", device)
 
     # define solver class
