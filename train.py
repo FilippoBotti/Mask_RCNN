@@ -5,7 +5,7 @@ import torch
 from datasets.modanet import ModaNetDataset
 from models.mask_rcnn import Mask_RCNN
 
-from utils.utils import train, validate, get_train_transform, save_model, collate_fn
+from utils.utils import train, validate, get_train_transform,get_valid_transform, save_model, collate_fn
 import argparse
 from torch.utils.tensorboard import SummaryWriter
 
@@ -38,7 +38,7 @@ def main(args):
     BATCH_SIZE = 1 # increase / decrease according to GPU memeory
     NUM_EPOCHS = 10 # number of epochs to train for
     NUM_WORKERS = 0
-    DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+    DEVICE = torch.device('mps') if torch.cuda.is_available() else torch.device('cpu')
     IMAGE_SIZE=[256,256]
 
     # classes: 0 index is reserved for background
@@ -46,18 +46,17 @@ def main(args):
         '__background__', '1','2','3','4','5','6','7','8','9','10','11','12','13'
     ]
 
-    DIR = "/Users/filippo/Desktop/università/deep_learning/progetto/ModaNetDatasets"
     ANN_FILE_NAME = "modanet2018_instances_train.json"
     NUM_CLASSES = len(CLASSES)
     # location to save model and plots
-    OUT_DIR = '/Users/filippo/Desktop/università/deep_learning/progetto/res'
+    OUT_DIR = '/content/img'
 
     # use our dataset and defined transformations
     dataset = ModaNetDataset(
-        DIR, ANN_FILE_NAME, CLASSES, IMAGE_SIZE, get_train_transform(train=True)
+        args.dataset_path, ANN_FILE_NAME, CLASSES, IMAGE_SIZE, get_train_transform()
     )
     dataset_test = ModaNetDataset(
-        DIR, ANN_FILE_NAME, CLASSES, IMAGE_SIZE, get_train_transform(train=False)
+        args.dataset_path, ANN_FILE_NAME, CLASSES, IMAGE_SIZE, get_valid_transform()
     )
     print(len(dataset))
 
@@ -92,7 +91,7 @@ def main(args):
     # # params = [p for p in model.parameters() if p.requires_grad]
     # # optimizer = torch.optim.AdamW(params=model.parameters(), lr=1e-5)
 
-    device = torch.device("cuda")
+    device = torch.device("cpu")
     # print("Device: ", device)
 
     # define solver class
@@ -101,7 +100,7 @@ def main(args):
             device=device,
             writer=writer,
             args=args,
-            num_classes=NUM_CLASSES)
+            classes = CLASSES)
 
     # TRAIN model
     solver.train()
