@@ -108,7 +108,7 @@ class Solver(object):
                
                 for loss in loss_dict:
                     dict[loss] += loss_dict[loss]
-                    print(dict[loss])
+                    #print(dict[loss])
                 if i % self.args.print_every == self.args.print_every - 1:  
                     
                     print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / self.args.print_every:.3f}')
