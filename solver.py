@@ -4,20 +4,26 @@ import torch.nn as nn
 import os
 import time
 from tqdm import tqdm
-
+import sys
 from models.mask_rcnn import Mask_RCNN
+from utils.utils import visualize_sample, matplotlib_imshow
+import matplotlib.pyplot as plt
+import torchvision
 
 class Solver(object):
     """Solver for training and testing."""
 
-    def __init__(self, train_loader, valid_loader, device, writer, num_classes, args):
+    def __init__(self, train_loader, valid_loader, device, writer, classes, args):
         """Initialize configurations."""
 
         self.args = args
         self.model_name = 'modanet_maskRCNN_{}.pth'.format(self.args.model_name)
 
         # Define the model
-        self.net = Mask_RCNN(num_classes).to(device)
+        self.classes = classes
+        self.num_classes = len(self.classes)
+
+        self.net = Mask_RCNN(self.num_classes).to(device)
 
         # load a pretrained model
         if self.args.resume_train == True:
@@ -34,7 +40,6 @@ class Solver(object):
         self.valid_loader = valid_loader
 
         self.device = device
-
         self.writer = writer
 
     def save_model(self):
@@ -53,21 +58,42 @@ class Solver(object):
         self.net.train()
         for epoch in range(self.epochs):
             print(f"\nEPOCH {epoch+1} of {self.epochs}")
-
+            running_loss = 0.0
             # start timer and carry out training and validation
             start = time.time()
             print('Training')
-            train_itr = 0
             train_loss_list = []
             
             # initialize tqdm progress bar
             prog_bar = tqdm(self.train_loader, total=len(self.train_loader))
-            
+            dict = {
+                 "loss_classifier":0,
+                "loss_box_reg":0,
+                "loss_mask":0,
+                "loss_objectness":0,
+                "loss_rpn_box_reg":0
+            }
             for i, data in enumerate(prog_bar):
                 self.optimizer.zero_grad()
                 images, targets = data
+                
+
                 images =  list(image.to(self.device) for image in images)
                 targets = [{k: v.to(self.device) for k, v in t.items()} for t in targets]
+                # for i in range(len(images)):
+                #     image = images[i]
+                #     target = targets[i]
+                #     with torch.no_grad():
+                #         self.net.eval()
+                #         tg = self.net(images)
+                #         targets = [{k: v.to(self.device) for k, v in t.items()} for t in tg]
+
+                #         visualize_samples = visualize_sample(images[i],targets[0],self.classes)
+                #         img_grid = torchvision.utils.make_grid(visualize_samples)
+
+                #     # write to tensorboard
+                #         self.writer.add_image(f'res{i}', img_grid)
+                    #print(target)
                 loss_dict = self.net(images, targets) # when given images and targets as input it will return the loss
                 losses = sum(loss for loss in loss_dict.values())
                 loss_value = losses.item()
@@ -79,6 +105,8 @@ class Solver(object):
                 prog_bar.set_description(desc=f"Loss: {loss_value:.4f}")
 
                 running_loss += loss_value
+               
+
                 if i % self.args.print_every == self.args.print_every - 1:  
                     
                     print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / self.args.print_every:.3f}')
@@ -86,8 +114,20 @@ class Solver(object):
                     self.writer.add_scalar('training loss',
                         running_loss / self.args.print_every,
                         epoch * len(self.train_loader) + i)
+                    for loss in dict:
+                        self.writer.add_scalar(loss,
+                        dict[loss].item() / self.args.print_every,
+                        epoch * len(self.train_loader) + i)
+                    
                     
                     running_loss = 0.0
+                    dict = {
+                 "loss_classifier":0,
+                "loss_box_reg":0,
+                "loss_mask":0,
+                "loss_objectness":0,
+                "loss_rpn_box_reg":0
+            }
 
             # validate model
             val_loss = self.validate()
@@ -116,7 +156,7 @@ class Solver(object):
             
             images = list(image.to(self.device) for image in images)
             targets = [{k: v.to(self.device) for k, v in t.items()} for t in targets]
-            
+
             with torch.no_grad():
                 loss_dict = self.net(images, targets)
             losses = sum(loss for loss in loss_dict.values())
