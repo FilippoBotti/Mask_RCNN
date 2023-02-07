@@ -27,7 +27,7 @@ class Solver(object):
 
         self.net = Mask_RCNN(self.num_classes).to(device)
 
-        scaler = GradScaler()
+        scaler =  torch.cuda.amp.GradScaler()
         # load a pretrained model
         if self.args.resume_train == True:
             self.load_model()
@@ -114,7 +114,7 @@ class Solver(object):
                     #     self.writer.add_image(f'res{i}', img_grid)
                     #print(target)
 
-                with autocast(device_type='cuda', dtype=torch.float16):
+                with torch.autocast(device_type='cuda', dtype=torch.float16):
                     loss_dict = self.net(images, targets) # when given images and targets as input it will return the loss
                     losses = sum(loss for loss in loss_dict.values())
                     loss_value = losses.item()
