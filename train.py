@@ -18,7 +18,7 @@ def get_args():
     parser.add_argument('--model_name', type=str, default="first_train", help='name of the model to be saved/loaded')
 
     parser.add_argument('--epochs', type=int, default=10, help='number of epochs')
-    parser.add_argument('--batch_size', type=int, default=16, help='number of elements in batch size')
+    parser.add_argument('--batch_size', type=int, default=8, help='number of elements in batch size')
     parser.add_argument('--workers', type=int, default=2, help='number of workers in data loader')
     parser.add_argument('--print_every', type=int, default=500, help='print losses every N iteration')
 
@@ -33,11 +33,10 @@ def get_args():
     return parser.parse_args()
 
 def main(args):
-    writer = SummaryWriter('./runs/' + args.run_name)
+    writer = SummaryWriter('./runs/' + args.run_name + args.opt)
 
-    BATCH_SIZE = 2 # increase / decrease according to GPU memeory
-    NUM_EPOCHS = 10 # number of epochs to train for
-    NUM_WORKERS = 2
+    BATCH_SIZE = args.batch_size # increase / decrease according to GPU memeory
+    NUM_WORKERS = args.workers
     DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     IMAGE_SIZE=[256,256]
 
@@ -47,9 +46,8 @@ def main(args):
     ]
 
     ANN_FILE_NAME = "modanet2018_instances_train.json"
-    NUM_CLASSES = len(CLASSES)
     # location to save model and plots
-    OUT_DIR = '/content/img'
+    OUT_DIR = args.checkpoint_path
 
     # use our dataset and defined transformations
     dataset = ModaNetDataset(
@@ -91,13 +89,13 @@ def main(args):
     # # params = [p for p in model.parameters() if p.requires_grad]
     # # optimizer = torch.optim.AdamW(params=model.parameters(), lr=1e-5)
 
-    device = torch.device("cuda")
-    # print("Device: ", device)
+    #device = torch.device("cuda")
+    print("Device: ", DEVICE)
 
     # define solver class
     solver = Solver(train_loader=data_loader,
             valid_loader=data_loader_valid,
-            device=device,
+            device=DEVICE,
             writer=writer,
             args=args,
             classes = CLASSES)
