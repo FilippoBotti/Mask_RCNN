@@ -8,6 +8,23 @@ import numpy as np
 from torchvision.utils import draw_segmentation_masks, make_grid
 import matplotlib.pyplot as plt
 
+import torchvision.transforms.functional as F
+
+
+plt.rcParams["savefig.bbox"] = 'tight'
+
+
+def show(imgs):
+    if not isinstance(imgs, list):
+        imgs = [imgs]
+    fig, axs = plt.subplots(ncols=len(imgs), squeeze=False)
+    for i, img in enumerate(imgs):
+        img = img.detach()
+        img = F.to_pil_image(img)
+        axs[0, i].imshow(np.asarray(img))
+        axs[0, i].set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])
+
+        plt.show()
 def matplotlib_imshow(img, one_channel=False):
     img = img.cpu()
     if one_channel:
@@ -51,6 +68,37 @@ def visualize_sample(image, target, classes):
 
     return images
 
+def visualize_result(image, target, classes):
+    original_img = image.byte()
+    mask=original_img.clone()
+    img = np.array(to_pil(image.byte())).copy()
+    # for box_num in range(len(target['boxes'])):
+    #     box = target['boxes'][box_num]
+    #     label = classes[target['labels'][box_num]]
+        
+
+    #     cv2.rectangle(
+    #         img, 
+    #         (int(box[0]), int(box[1])), (int(box[2]), int(box[3])),
+    #         (0, 255, 0), 2
+    #     )
+    #     cv2.putText(
+    #         img, label, (int(box[0]), int(box[1]-5)), 
+    #         cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2
+    #     )
+    # print("asd",(target['masks']>0).size())
+    # for i in range(len(target['masks'])):
+    #     msk=target['masks'][i,0].detach().cpu().numpy()
+    #     scr=target['scores'][i].detach().cpu().numpy()
+    #     if scr>0.8 :
+    for el in target:
+        print(el.size())
+        mask = draw_segmentation_masks(original_img,el.squeeze(1)>0)
+
+    images = [original_img, torch.from_numpy(img).permute(2,0,1), mask]
+
+    return images
+
 def pil_loader(path):
     # open path as file to avoid ResourceWarning
     with open(path, 'rb') as f:
@@ -65,39 +113,11 @@ def collate_fn(batch):
     return tuple(zip(*batch)) 
 
 
-# define train and test functions
-
-def train(train_data_loader, model, optimizer, device):
-    print('Training')
-    train_itr = 0
-    train_loss_list = []
-    
-    # initialize tqdm progress bar
-    prog_bar = tqdm(train_data_loader, total=len(train_data_loader))
-    
-    for i, data in enumerate(prog_bar):
-        optimizer.zero_grad()
-        images, targets = data
-        images =  list(image.to(device) for image in images)
-        targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
-        loss_dict = model(images, targets) # when given images and targets as input it will return the loss
-        print(loss_dict)
-        losses = sum(loss for loss in loss_dict.values())
-        loss_value = losses.item()
-        train_loss_list.append(loss_value)
-        losses.backward()
-        optimizer.step()
-        train_itr += 1
-    
-        # update the loss value beside the progress bar for each iteration
-        prog_bar.set_description(desc=f"Loss: {loss_value:.4f}")
-    return train_loss_list
-
 def get_train_transform():
     return T.Compose([
         T.PILToTensor(),
         T.ConvertImageDtype(torch.float),
-        T.RandomHorizontalFlip(p=0.5), # in this example this is not needed: why?
+        T.RandomHorizontalFlip(p=0.5),
     ])
 # define the validation transforms
 def get_valid_transform():
@@ -105,30 +125,6 @@ def get_valid_transform():
         T.PILToTensor(),
         T.ConvertImageDtype(torch.float)
     ])
-
-def validate(valid_data_loader, model, optimizer, device):
-    print('Validating')
-    val_itr = 0
-    val_loss_list = []
-    
-    # initialize tqdm progress bar
-    prog_bar = tqdm(valid_data_loader, total=len(valid_data_loader))
-    
-    for i, data in enumerate(prog_bar):
-        images, targets = data
-        
-        images = list(image.to(device) for image in images)
-        targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
-        
-        with torch.no_grad():
-            loss_dict = model(images, targets)
-        losses = sum(loss for loss in loss_dict.values())
-        loss_value = losses.item()
-        val_loss_list.append(loss_value)
-        val_itr += 1
-        # update the loss value beside the progress bar for each iteration
-        prog_bar.set_description(desc=f"Loss: {loss_value:.4f}\n\n")
-    return val_loss_list
 
 def save_model(epoch, model, optimizer):
     """
@@ -139,3 +135,29 @@ def save_model(epoch, model, optimizer):
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 }, 'res/mask_rcnn.pth')
+    
+def get_prediction(pred, classes, confidence=0.8):
+    """
+    get_prediction
+      parameters:
+        - img_path - path of the input image
+        - confidence - threshold to keep the prediction or not
+      method:
+        - Image is obtained from the image path
+        - the image is converted to image tensor using PyTorch's Transforms
+        - image is passed through the model to get the predictions
+        - masks, classes and bounding boxes are obtained from the model and soft masks are made binary(0 or 1) on masks
+          ie: eg. segment of cat is made 1 and rest of the image is made 0
+    
+    """
+    pred_score = list(pred[0]['scores'].detach().cpu().numpy())
+    print(pred_score.size)
+    pred_t = [pred_score.index(x) for x in pred_score if x>confidence][-1]
+    masks = (pred[0]['masks']>0.5).squeeze().detach().cpu().numpy()
+    # print(pred[0]['labels'].numpy().max())
+    pred_class = [classes[i] for i in list(pred[0]['labels'].cpu().numpy())]
+    pred_boxes = [[(i[0], i[1]), (i[2], i[3])] for i in list(pred[0]['boxes'].detach().cpu().numpy())]
+    masks = masks[:pred_t+1]
+    pred_boxes = pred_boxes[:pred_t+1]
+    pred_class = pred_class[:pred_t+1]
+    return masks, pred_boxes, pred_class

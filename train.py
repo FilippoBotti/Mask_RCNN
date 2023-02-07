@@ -5,7 +5,7 @@ import torch
 from datasets.modanet import ModaNetDataset
 from models.mask_rcnn import Mask_RCNN
 
-from utils.utils import train, validate, get_train_transform,get_valid_transform, save_model, collate_fn
+from utils.utils import get_train_transform,get_valid_transform, collate_fn
 import argparse
 from torch.utils.tensorboard import SummaryWriter
 

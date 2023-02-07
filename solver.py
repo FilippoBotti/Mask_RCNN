@@ -6,9 +6,11 @@ import time
 from tqdm import tqdm
 import sys
 from models.mask_rcnn import Mask_RCNN
-from utils.utils import visualize_sample, matplotlib_imshow
+from utils.utils import visualize_sample, matplotlib_imshow, get_prediction, visualize_result, show, get_valid_transform, pil_loader
+from torchvision.utils import draw_segmentation_masks, make_grid
 import matplotlib.pyplot as plt
 import torchvision
+import cv2, random, numpy as np
 
 class Solver(object):
     """Solver for training and testing."""
@@ -80,20 +82,38 @@ class Solver(object):
 
                 images =  list(image.to(self.device) for image in images)
                 targets = [{k: v.to(self.device) for k, v in t.items()} for t in targets]
+
+
                 # for i in range(len(images)):
-                #     image = images[i]
-                #     target = targets[i]
                 #     with torch.no_grad():
                 #         self.net.eval()
-                #         tg = self.net(images)
-                #         targets = [{k: v.to(self.device) for k, v in t.items()} for t in tg]
+                #         outputs = self.net([images[i]])
+                #         print(images[i])
+                #         score_threshold = .4
+                #         mean, std = images[i].mean(), images[i].std()
+                        
+                #         dogs_with_boxes = [
+                #             torchvision.utils.draw_bounding_boxes(img, boxes=output['boxes'][output['scores'] > score_threshold], width=4)
+                #             for img, output in zip(images, outputs)
+                #         ]
+                #         x = images[0].type(torch.uint8)
+                #         show(dogs_with_boxes)
+                # if i> 1:
+                #     break
+                        
+                    #     targets = [{k: v.to(self.device) for k, v in t.items()} for t in tg]
+                    #     boolean_masks = [
+                    #         out['masks'][out['scores'] > 0.1] > 0
+                    #         for out in tg
+                    #     ]
+                    #     visualize_samples = visualize_result(images[0],boolean_masks,self.classes)
+                    #     img_grid = torchvision.utils.make_grid(visualize_samples)
 
-                #         visualize_samples = visualize_sample(images[i],targets[0],self.classes)
-                #         img_grid = torchvision.utils.make_grid(visualize_samples)
-
-                #     # write to tensorboard
-                #         self.writer.add_image(f'res{i}', img_grid)
+                    # # # write to tensorboard
+                    #     self.writer.add_image(f'res{i}', img_grid)
                     #print(target)
+
+
                 loss_dict = self.net(images, targets) # when given images and targets as input it will return the loss
                 losses = sum(loss for loss in loss_dict.values())
                 loss_value = losses.item()
@@ -108,7 +128,6 @@ class Solver(object):
                
                 for loss in loss_dict:
                     dict[loss] += loss_dict[loss]
-                    #print(dict[loss])
                 if i % self.args.print_every == self.args.print_every - 1:  
                     
                     print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / self.args.print_every:.3f}')
@@ -154,7 +173,7 @@ class Solver(object):
         
         # initialize tqdm progress bar
         prog_bar = tqdm(self.valid_loader, total=len(self.valid_loader))
-        
+        loss_value = 0
         for i, data in enumerate(prog_bar):
             images, targets = data
             

@@ -86,7 +86,6 @@ class ModaNetDataset(torch.utils.data.Dataset):
 
         if self.transforms is not None:
             img, target = self.transforms(img, target)
-        img = img.float()
         return img, target
 
     def __len__(self):
