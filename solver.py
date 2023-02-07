@@ -27,7 +27,7 @@ class Solver(object):
 
         self.net = Mask_RCNN(self.num_classes).to(device)
 
-        scaler =  torch.cuda.amp.GradScaler()
+        self.scaler =  torch.cuda.amp.GradScaler()
         # load a pretrained model
         if self.args.resume_train == True:
             self.load_model()
