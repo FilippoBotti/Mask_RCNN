@@ -27,6 +27,7 @@ class Solver(object):
 
         self.net = Mask_RCNN(self.num_classes).to(device)
 
+        scaler = GradScaler()
         # load a pretrained model
         if self.args.resume_train == True:
             self.load_model()
@@ -113,14 +114,21 @@ class Solver(object):
                     #     self.writer.add_image(f'res{i}', img_grid)
                     #print(target)
 
+                with autocast(device_type='cuda', dtype=torch.float16):
+                    loss_dict = self.net(images, targets) # when given images and targets as input it will return the loss
+                    losses = sum(loss for loss in loss_dict.values())
+                    loss_value = losses.item()
+                    train_loss_list.append(loss_value)
+                self.scaler.scale(losses).backward()
 
-                loss_dict = self.net(images, targets) # when given images and targets as input it will return the loss
-                losses = sum(loss for loss in loss_dict.values())
-                loss_value = losses.item()
-                train_loss_list.append(loss_value)
-                losses.backward()
-                self.optimizer.step()
-            
+                # scaler.step() first unscales the gradients of the optimizer's assigned params.
+                # If these gradients do not contain infs or NaNs, optimizer.step() is then called,
+                # otherwise, optimizer.step() is skipped.
+                self.scaler.step(self.optimizer)
+
+                # Updates the scale for next iteration.
+                self.scaler.update()
+
                 # update the loss value beside the progress bar for each iteration
                 prog_bar.set_description(desc=f"Loss: {loss_value:.4f}")
 
