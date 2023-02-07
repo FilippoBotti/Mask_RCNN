@@ -37,7 +37,7 @@ def main(args):
 
     BATCH_SIZE = 1 # increase / decrease according to GPU memeory
     NUM_EPOCHS = 10 # number of epochs to train for
-    NUM_WORKERS = 0
+    NUM_WORKERS = 2
     DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     IMAGE_SIZE=[256,256]
 
