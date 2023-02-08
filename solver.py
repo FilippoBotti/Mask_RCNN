@@ -6,7 +6,7 @@ import time
 from tqdm import tqdm
 import sys
 from models.mask_rcnn import Mask_RCNN
-from utils.utils import visualize_sample, matplotlib_imshow, get_prediction, visualize_result, show, get_valid_transform, pil_loader
+from utils.utils import  visualize_mask, show
 from torchvision.utils import draw_segmentation_masks, make_grid
 import matplotlib.pyplot as plt
 import torchvision
@@ -26,7 +26,6 @@ class Solver(object):
 
         self.net = Mask_RCNN(self.num_classes).to(device)
 
-        self.scaler =  torch.cuda.amp.GradScaler()
         # load a pretrained model
         if self.args.resume_train == True:
             self.load_model()
@@ -57,82 +56,83 @@ class Solver(object):
         print("Model loaded!")
     
     def train(self):
-        self.net.train()
-        for epoch in range(self.epochs):
-            print(f"\nEPOCH {epoch+1} of {self.epochs}")
-            running_loss = 0.0
-            # start timer and carry out training and validation
-            start = time.time()
-            print('Solver Training')
-            train_loss_list = []
+        # self.net.train()
+        # for epoch in range(self.epochs):
+        #     print(f"\nEPOCH {epoch+1} of {self.epochs}")
+        #     running_loss = 0.0
+        #     # start timer and carry out training and validation
+        #     start = time.time()
+        #     print('Solver Training')
+        #     train_loss_list = []
             
-            # initialize tqdm progress bar
-            prog_bar = tqdm(self.train_loader, total=len(self.train_loader))
-            loss_dict_tb = {
-                "loss_classifier": 0,
-                "loss_box_reg": 0,
-                "loss_mask": 0,
-                "loss_objectness": 0,
-                "loss_rpn_box_reg": 0
-            }
+        #     # initialize tqdm progress bar
+        #     prog_bar = tqdm(self.train_loader, total=len(self.train_loader))
+        #     loss_dict_tb = {
+        #         "loss_classifier": 0,
+        #         "loss_box_reg": 0,
+        #         "loss_mask": 0,
+        #         "loss_objectness": 0,
+        #         "loss_rpn_box_reg": 0
+        #     }
 
-            for i, data in enumerate(prog_bar):
-                self.optimizer.zero_grad()
-                images, targets = data
-                images =  list(image.to(self.device) for image in images)
-                targets = [{k: v.to(self.device) for k, v in t.items()} for t in targets]
+        #     for i, data in enumerate(prog_bar):
+        #         self.optimizer.zero_grad()
+        #         images, targets = data
+        #         images =  list(image.to(self.device) for image in images)
+        #         targets = [{k: v.to(self.device) for k, v in t.items()} for t in targets]
 
-                loss_dict = self.net(images, targets) # when given images and targets as input it will return the loss
-                losses = sum(loss for loss in loss_dict.values())
-                loss_value = losses.item()
-                train_loss_list.append(loss_value)
-                losses.backward()
-                self.optimizer.step()
+        #         loss_dict = self.net(images, targets) # when given images and targets as input it will return the loss
+        #         losses = sum(loss for loss in loss_dict.values())
+        #         loss_value = losses.item()
+        #         train_loss_list.append(loss_value)
+        #         losses.backward()
+        #         self.optimizer.step()
                 
-                prog_bar.set_description(desc=f"Loss: {loss_value:.4f}")
+        #         prog_bar.set_description(desc=f"Loss: {loss_value:.4f}")
 
-                running_loss += loss_value
+        #         running_loss += loss_value
                
-                for loss in loss_dict:
-                    loss_dict_tb[loss] += loss_dict[loss].item()
+        #         for loss in loss_dict:
+        #             loss_dict_tb[loss] += loss_dict[loss].item()
 
-                del losses, loss_dict, loss_value
+        #         del losses, loss_dict, loss_value
 
-                if i % self.args.print_every == self.args.print_every - 1:  
-                    print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / self.args.print_every:.3f}')
+        #         if i % self.args.print_every == self.args.print_every - 1:  
+        #             print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / self.args.print_every:.3f}')
 
-                    self.writer.add_scalar('training loss',
-                        running_loss / self.args.print_every,
-                        epoch * len(self.train_loader) + i)
+        #             self.writer.add_scalar('training loss',
+        #                 running_loss / self.args.print_every,
+        #                 epoch * len(self.train_loader) + i)
                     
-                    for loss in loss_dict_tb:
-                        self.writer.add_scalar(loss,
-                        loss_dict_tb[loss]/ self.args.print_every,
-                        epoch * len(self.train_loader) + i)
+        #             for loss in loss_dict_tb:
+        #                 self.writer.add_scalar(loss,
+        #                 loss_dict_tb[loss]/ self.args.print_every,
+        #                 epoch * len(self.train_loader) + i)
 
-                    running_loss = 0.0
-                    loss_dict_tb = {
-                        "loss_classifier": 0,
-                        "loss_box_reg": 0,
-                        "loss_mask": 0,
-                        "loss_objectness": 0,
-                        "loss_rpn_box_reg": 0
-                    }
+        #             running_loss = 0.0
+        #             loss_dict_tb = {
+        #                 "loss_classifier": 0,
+        #                 "loss_box_reg": 0,
+        #                 "loss_mask": 0,
+        #                 "loss_objectness": 0,
+        #                 "loss_rpn_box_reg": 0
+        #             }
 
-            val_loss_list = self.validate()
+        #     val_loss_list = self.validate()
 
-            print(f"Epoch #{epoch+1} train loss: {sum(train_loss_list)//len(self.train_loader):.3f}")   
-            print(f"Epoch #{epoch+1} validation loss: {sum(val_loss_list)//len(self.valid_loader):.3f}")  
+        #     print(f"Epoch #{epoch+1} train loss: {sum(train_loss_list)//len(self.train_loader):.3f}")   
+        #     print(f"Epoch #{epoch+1} validation loss: {sum(val_loss_list)//len(self.valid_loader):.3f}")  
 
-            self.writer.add_scalar('validation loss',
-                        sum(val_loss_list)//len(self.valid_loader),epoch)
-            end = time.time()
-            print(f"Took {((end - start) / 60):.3f} minutes for epoch {epoch}")
+        #     self.writer.add_scalar('validation loss',
+        #                 sum(val_loss_list)//len(self.valid_loader),epoch)
+        #     end = time.time()
+        #     print(f"Took {((end - start) / 60):.3f} minutes for epoch {epoch}")
 
-            self.save_model()
-        self.writer.flush()
-        self.writer.close()
-        print('Finished Training')   
+        #     self.save_model()
+        # self.writer.flush()
+        # self.writer.close()
+        # print('Finished Training')  
+        self.test() 
     
     def validate(self):
         print('Validating')
@@ -155,3 +155,13 @@ class Solver(object):
             prog_bar.set_description(desc=f"Loss: {loss_value:.4f}\n\n")
         self.net.train()
         return val_loss_list
+    
+    def test(self):
+        print("Testing")
+        for data in self.valid_loader:
+            images, targets = data
+            self.net.eval()
+            prediction = self.net([images[0]])
+            # print(predictions)
+            results = visualize_mask(images[0],prediction,targets[0])
+            show(results)

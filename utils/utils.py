@@ -13,18 +13,44 @@ import torchvision.transforms.functional as F
 
 plt.rcParams["savefig.bbox"] = 'tight'
 
+MASK_COLORS=[
+(255, 0, 0) ,# Red
+(0, 255, 0) ,# Green
+(0, 0, 255) ,# Blue
+(255, 255, 0) ,# Yellow
+(255, 0, 255) ,# Magenta
+(0, 255, 255) ,# Cyan
+(128, 0, 0) ,# Maroon
+(0, 128, 0) ,# Olive
+(0, 0, 128) ,# Navy
+(128, 128, 0) ,# Olive Drab
+(128, 0, 128) ,# Purple
+(0, 128, 128) ,# Teal
+(192, 192, 192) ,# Silver
+]
+
+
 
 def show(imgs):
-    if not isinstance(imgs, list):
-        imgs = [imgs]
-    fig, axs = plt.subplots(ncols=len(imgs), squeeze=False)
-    for i, img in enumerate(imgs):
-        img = img.detach()
-        img = F.to_pil_image(img)
-        axs[0, i].imshow(np.asarray(img))
-        axs[0, i].set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])
+    if(len(imgs)!=3):
+        print("Not correct size", len(imgs))
+        return
+    
+    print('RED   bag\nGREEN	belt\nBLUE	boots\nYELLOW	footwear\nMAGENTA	outer\nCIANO	dress\nMARRONE	sunglasses\nOLIVA	pants\nNAVY top\nOLIVE DRAB	shorts\nVIOLA	skirt\nTEAL	headwear\nARGENTO	scarf\n')
+    plt.subplot(1,3,1)
+    plt.imshow(np.squeeze(imgs[0].cpu().numpy()).transpose(1,2,0))
+    plt.title('Original Image')
+    plt.axis('off')
+    plt.subplot(1,3,2)
+    plt.imshow(imgs[1].cpu().numpy().transpose(1,2,0))
+    plt.title('Prediction')
+    plt.axis('off')
+    plt.subplot(1,3,3)
+    plt.imshow(imgs[2].cpu().numpy().transpose(1,2,0))
+    plt.title('Original Mask')
+    plt.axis('off')
+    plt.show()
 
-        plt.show()
 def matplotlib_imshow(img, one_channel=False):
     img = img.cpu()
     if one_channel:
@@ -68,36 +94,25 @@ def visualize_sample(image, target, classes):
 
     return images
 
-def visualize_result(image, target, classes):
-    original_img = image.byte()
-    mask=original_img.clone()
-    img = np.array(to_pil(image.byte())).copy()
-    # for box_num in range(len(target['boxes'])):
-    #     box = target['boxes'][box_num]
-    #     label = classes[target['labels'][box_num]]
-        
 
-    #     cv2.rectangle(
-    #         img, 
-    #         (int(box[0]), int(box[1])), (int(box[2]), int(box[3])),
-    #         (0, 255, 0), 2
-    #     )
-    #     cv2.putText(
-    #         img, label, (int(box[0]), int(box[1]-5)), 
-    #         cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2
-    #     )
-    # print("asd",(target['masks']>0).size())
-    # for i in range(len(target['masks'])):
-    #     msk=target['masks'][i,0].detach().cpu().numpy()
-    #     scr=target['scores'][i].detach().cpu().numpy()
-    #     if scr>0.8 :
-    for el in target:
-        print(el.size())
-        mask = draw_segmentation_masks(original_img,el.squeeze(1)>0)
 
-    images = [original_img, torch.from_numpy(img).permute(2,0,1), mask]
+def visualize_mask(image, prediction, target):
+    image = ((image - image.min()) * (1/(image.max() - image.min()) * 255)).byte()
+    mask = torch.zeros_like(image)
+    real_mask = torch.zeros_like(image)
 
-    return images
+
+    for i in range(len(prediction[0]['masks'])):
+        msk=prediction[0]['masks'][i,0].detach().cpu()
+        scr=prediction[0]['scores'][i].detach().cpu()
+        label = prediction[0]['labels'][i].detach().cpu()
+        if scr>0.1:
+            mask = draw_segmentation_masks(mask,msk>0.5,1, MASK_COLORS[label-1])
+    
+    for i in range(len(target['masks'])):
+        real_mask = draw_segmentation_masks(real_mask,target['masks'][i]>0,1, MASK_COLORS[target['labels'][i]-1])
+    results = [image, mask, real_mask]
+    return results
 
 def pil_loader(path):
     # open path as file to avoid ResourceWarning
@@ -135,29 +150,3 @@ def save_model(epoch, model, optimizer):
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 }, 'res/mask_rcnn.pth')
-    
-def get_prediction(pred, classes, confidence=0.8):
-    """
-    get_prediction
-      parameters:
-        - img_path - path of the input image
-        - confidence - threshold to keep the prediction or not
-      method:
-        - Image is obtained from the image path
-        - the image is converted to image tensor using PyTorch's Transforms
-        - image is passed through the model to get the predictions
-        - masks, classes and bounding boxes are obtained from the model and soft masks are made binary(0 or 1) on masks
-          ie: eg. segment of cat is made 1 and rest of the image is made 0
-    
-    """
-    pred_score = list(pred[0]['scores'].detach().cpu().numpy())
-    print(pred_score.size)
-    pred_t = [pred_score.index(x) for x in pred_score if x>confidence][-1]
-    masks = (pred[0]['masks']>0.5).squeeze().detach().cpu().numpy()
-    # print(pred[0]['labels'].numpy().max())
-    pred_class = [classes[i] for i in list(pred[0]['labels'].cpu().numpy())]
-    pred_boxes = [[(i[0], i[1]), (i[2], i[3])] for i in list(pred[0]['boxes'].detach().cpu().numpy())]
-    masks = masks[:pred_t+1]
-    pred_boxes = pred_boxes[:pred_t+1]
-    pred_class = pred_class[:pred_t+1]
-    return masks, pred_boxes, pred_class
