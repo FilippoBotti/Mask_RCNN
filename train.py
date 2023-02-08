@@ -37,9 +37,9 @@ def main(args):
 
     BATCH_SIZE = args.batch_size # increase / decrease according to GPU memeory
     NUM_WORKERS = args.workers
-    if torch.backends.mps.is_available():
+    if torch.cuda.is_available():
         DEVICE = torch.device("mps")
-    elif torch.cuda.is_available(): 
+    elif torch.backends.mps.is_available(): 
         DEVICE = torch.device("cuda")
     else:
         DEVICE = torch.device("cpu")
