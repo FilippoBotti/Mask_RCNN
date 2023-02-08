@@ -37,8 +37,14 @@ def main(args):
 
     BATCH_SIZE = args.batch_size # increase / decrease according to GPU memeory
     NUM_WORKERS = args.workers
-    DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-    IMAGE_SIZE=[256,256]
+    if torch.backends.mps.is_available():
+        DEVICE = torch.device("mps")
+    elif torch.cuda.is_available(): 
+        DEVICE = torch.device("cuda")
+    else:
+        DEVICE = torch.device("cpu")
+
+    IMAGE_SIZE=[200,300]
 
     # classes: 0 index is reserved for background
     CLASSES = [

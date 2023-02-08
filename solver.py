@@ -17,7 +17,6 @@ class Solver(object):
 
     def __init__(self, train_loader, valid_loader, device, writer, classes, args):
         """Initialize configurations."""
-
         self.args = args
         self.model_name = 'modanet_maskRCNN_{}.pth'.format(self.args.model_name)
 
@@ -69,107 +68,66 @@ class Solver(object):
             
             # initialize tqdm progress bar
             prog_bar = tqdm(self.train_loader, total=len(self.train_loader))
-            dict = {
-                 "loss_classifier":0,
-                "loss_box_reg":0,
-                "loss_mask":0,
-                "loss_objectness":0,
-                "loss_rpn_box_reg":0
+            loss_dict_tb = {
+                "loss_classifier": 0,
+                "loss_box_reg": 0,
+                "loss_mask": 0,
+                "loss_objectness": 0,
+                "loss_rpn_box_reg": 0
             }
+
             for i, data in enumerate(prog_bar):
                 self.optimizer.zero_grad()
                 images, targets = data
-                
-
                 images =  list(image.to(self.device) for image in images)
                 targets = [{k: v.to(self.device) for k, v in t.items()} for t in targets]
 
+                loss_dict = self.net(images, targets) # when given images and targets as input it will return the loss
+                losses = sum(loss for loss in loss_dict.values())
+                loss_value = losses.item()
+                train_loss_list.append(loss_value)
+                losses.backward()
+                self.optimizer.step()
 
-                # for i in range(len(images)):
-                #     with torch.no_grad():
-                #         self.net.eval()
-                #         outputs = self.net([images[i]])
-                #         print(images[i])
-                #         score_threshold = .4
-                #         mean, std = images[i].mean(), images[i].std()
-                        
-                #         dogs_with_boxes = [
-                #             torchvision.utils.draw_bounding_boxes(img, boxes=output['boxes'][output['scores'] > score_threshold], width=4)
-                #             for img, output in zip(images, outputs)
-                #         ]
-                #         x = images[0].type(torch.uint8)
-                #         show(dogs_with_boxes)
-                # if i> 1:
-                #     break
-                        
-                    #     targets = [{k: v.to(self.device) for k, v in t.items()} for t in tg]
-                    #     boolean_masks = [
-                    #         out['masks'][out['scores'] > 0.1] > 0
-                    #         for out in tg
-                    #     ]
-                    #     visualize_samples = visualize_result(images[0],boolean_masks,self.classes)
-                    #     img_grid = torchvision.utils.make_grid(visualize_samples)
-
-                    # # # write to tensorboard
-                    #     self.writer.add_image(f'res{i}', img_grid)
-                    #print(target)
-
-                with torch.autocast(device_type='cuda', dtype=torch.float16):
-                    loss_dict = self.net(images, targets) # when given images and targets as input it will return the loss
-                    losses = sum(loss for loss in loss_dict.values())
-                    loss_value = losses.item()
-                    train_loss_list.append(loss_value)
-                self.scaler.scale(losses).backward()
-
-                # scaler.step() first unscales the gradients of the optimizer's assigned params.
-                # If these gradients do not contain infs or NaNs, optimizer.step() is then called,
-                # otherwise, optimizer.step() is skipped.
-                self.scaler.step(self.optimizer)
-
-                # Updates the scale for next iteration.
-                self.scaler.update()
-
-                # update the loss value beside the progress bar for each iteration
                 prog_bar.set_description(desc=f"Loss: {loss_value:.4f}")
 
                 running_loss += loss_value
                
                 for loss in loss_dict:
-                    dict[loss] += loss_dict[loss]
+                    loss_dict_tb[loss] += loss_dict[loss]
+
                 if i % self.args.print_every == self.args.print_every - 1:  
-                    
                     print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / self.args.print_every:.3f}')
 
                     self.writer.add_scalar('training loss',
                         running_loss / self.args.print_every,
                         epoch * len(self.train_loader) + i)
-                    for loss in dict:
+                    
+                    for loss in loss_dict_tb:
                         self.writer.add_scalar(loss,
-                        dict[loss]/ self.args.print_every,
+                        loss_dict_tb[loss]/ self.args.print_every,
                         epoch * len(self.train_loader) + i)
-                    
-                    
-                    running_loss = 0.0
-                    dict = {
-                 "loss_classifier":0,
-                "loss_box_reg":0,
-                "loss_mask":0,
-                "loss_objectness":0,
-                "loss_rpn_box_reg":0
-            }
 
-            # validate model
-            val_loss = self.validate()
-            #val_loss = validate(self.valid_loader, self.net, self.optimizer, self.device)
+                    running_loss = 0.0
+                    loss_dict_tb = {
+                        "loss_classifier": 0,
+                        "loss_box_reg": 0,
+                        "loss_mask": 0,
+                        "loss_objectness": 0,
+                        "loss_rpn_box_reg": 0
+                    }
+
+            val_loss_list = self.validate()
+
             print(f"Epoch #{epoch+1} train loss: {sum(train_loss_list)//len(self.train_loader):.3f}")   
-            print(f"Epoch #{epoch+1} validation loss: {sum(val_loss)//len(self.valid_loader):.3f}")   
+            print(f"Epoch #{epoch+1} validation loss: {sum(val_loss_list)//len(self.valid_loader):.3f}")  
+
             self.writer.add_scalar('validation loss',
-                        val_loss,epoch)
+                        sum(val_loss_list)//len(self.valid_loader),epoch)
             end = time.time()
             print(f"Took {((end - start) / 60):.3f} minutes for epoch {epoch}")
-            # save the current epoch model
-            self.save_model()
 
+            self.save_model()
         self.writer.flush()
         self.writer.close()
         print('Finished Training')   
@@ -178,23 +136,20 @@ class Solver(object):
         print('Validating')
         val_itr = 0
         val_loss_list = []
-        
         # initialize tqdm progress bar
         prog_bar = tqdm(self.valid_loader, total=len(self.valid_loader))
         loss_value = 0
         for i, data in enumerate(prog_bar):
             images, targets = data
-            
             images = list(image.to(self.device) for image in images)
             targets = [{k: v.to(self.device) for k, v in t.items()} for t in targets]
-
             with torch.no_grad():
                 loss_dict = self.net(images, targets)
             losses = sum(loss for loss in loss_dict.values())
-            loss_value += losses.item()
+            loss_value = losses.item()
             val_loss_list.append(loss_value)
             val_itr += 1
             # update the loss value beside the progress bar for each iteration
             prog_bar.set_description(desc=f"Loss: {loss_value:.4f}\n\n")
         self.net.train()
-        return loss_value/i
+        return val_loss_list
