@@ -94,7 +94,7 @@ class Solver(object):
                 running_loss += loss_value
                
                 for loss in loss_dict:
-                    loss_dict_tb[loss] += loss_dict[loss]
+                    loss_dict_tb[loss] += loss_dict[loss].item()
 
                 if i % self.args.print_every == self.args.print_every - 1:  
                     print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / self.args.print_every:.3f}')
