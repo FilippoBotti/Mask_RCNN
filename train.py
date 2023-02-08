@@ -42,7 +42,7 @@ def main(args):
     else:
         DEVICE = torch.device("cpu")
 
-    IMAGE_SIZE=[133,200]
+    IMAGE_SIZE=[67,100]
 
     # classes: 0 index is reserved for background
     CLASSES = [
