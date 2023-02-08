@@ -39,6 +39,7 @@ class ModaNetDataset(torch.utils.data.Dataset):
         img = pil_loader(img_path)
         
         image_width, image_height = img.size
+        print(img.size)
         # carico le ANNOTAZIONI di questa immagine
         ann_ids = self.annotations.getAnnIds(imgIds=[img_id])
         img_anns = self.annotations.loadAnns(ann_ids)
@@ -47,6 +48,7 @@ class ModaNetDataset(torch.utils.data.Dataset):
         labels = []
         mask = []
         img = img.resize((self.width, self.height))
+        print(img.size)
         for ann in img_anns:
             current_mask = self.annotations.annToMask(ann)
             current_mask= (current_mask > 0).astype(np.uint8)

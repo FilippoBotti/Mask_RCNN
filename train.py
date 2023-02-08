@@ -39,12 +39,10 @@ def main(args):
     NUM_WORKERS = args.workers
     if torch.cuda.is_available():
         DEVICE = torch.device("cuda")
-    elif torch.backends.mps.is_available(): 
-        DEVICE = torch.device("mps")
     else:
         DEVICE = torch.device("cpu")
 
-    IMAGE_SIZE=[256,256]
+    IMAGE_SIZE=[133,200]
 
     # classes: 0 index is reserved for background
     CLASSES = [
