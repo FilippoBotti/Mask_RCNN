@@ -143,7 +143,7 @@ def get_valid_transform():
 
 def save_model(epoch, model, optimizer):
     """
-    Function to save the trained model till current epoch, or whenver called
+    https://drive.google.com/file/d/1W_GRxnTfgGarIvobS7CJDCjcO9Hc6drg/view
     """
     torch.save({
                 'epoch': epoch+1,

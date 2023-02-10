@@ -52,7 +52,7 @@ class Solver(object):
     def load_model(self):
         # function to load the model
         check_path = os.path.join(self.args.checkpoint_path, self.model_name)
-        self.net.load_state_dict(torch.load(check_path))
+        self.net.load_state_dict(torch.load(check_path, map_location=torch.device('cpu')))
         print("Model loaded!")
     
     def train(self):
