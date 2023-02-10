@@ -31,7 +31,8 @@ class Solver(object):
             self.load_model()
         
         # Choose optimizer
-        names,params = [n,p for n,p in self.net.named_parameters() if p.requires_grad]
+        params = [p for p in self.net.parameters() if p.requires_grad]
+        names = [n for n,p in self.net.named_parameters() if p.requires_grad]
         print(names)
         if self.args.opt == "SGD":
             self.optimizer = optim.SGD(params, lr=self.args.lr)
