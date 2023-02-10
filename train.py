@@ -54,20 +54,17 @@ def main(args):
     OUT_DIR = args.checkpoint_path
 
     # use our dataset and defined transformations
-    dataset = ModaNetDataset(
+    total_dataset = ModaNetDataset(
         args.dataset_path, ANN_FILE_NAME, CLASSES, IMAGE_SIZE, get_train_transform()
     )
-    dataset_test = ModaNetDataset(
-        args.dataset_path, ANN_FILE_NAME, CLASSES, IMAGE_SIZE, get_valid_transform()
-    )
-    print(len(dataset))
+    print(len(total_dataset))
 
     # split the dataset in train and test set
     torch.manual_seed(1)
-    indices = torch.randperm(len(dataset)).tolist()
-    dataset = torch.utils.data.Subset(dataset, indices[:-9372])
-    dataset_valid = torch.utils.data.Subset(dataset_test, indices[-9372:-4686])
-    dataset_test = torch.utils.data.Subset(dataset_test, indices[-4686:])
+    indices = torch.randperm(len(total_dataset)).tolist()
+    dataset = torch.utils.data.Subset(total_dataset, indices[:-9372])
+    dataset_valid = torch.utils.data.Subset(total_dataset, indices[-9372:-4686])
+    dataset_test = torch.utils.data.Subset(total_dataset, indices[-4686:])
 
     # define training and validation data loaders
     data_loader = DataLoader(
@@ -99,6 +96,7 @@ def main(args):
     # define solver class
     solver = Solver(train_loader=data_loader,
             valid_loader=data_loader_valid,
+            test_loader=data_loader_test,
             device=DEVICE,
             writer=writer,
             args=args,
