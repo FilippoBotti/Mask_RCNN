@@ -6,7 +6,7 @@ import time
 from tqdm import tqdm
 import sys
 from models.mask_rcnn import Mask_RCNN
-from utils.utils import  visualize_mask, show
+from utils.utils import  visualize_mask, show, visualize_sample
 from torchvision.utils import draw_segmentation_masks, make_grid
 import matplotlib.pyplot as plt
 import torchvision
@@ -167,5 +167,5 @@ class Solver(object):
             self.net.eval()
             prediction = self.net([images[0]])
             # print(predictions)
-            results = visualize_mask(images[0],prediction,targets[0])
+            results = visualize_sample(images[0],targets[0],self.classes)
             show(results)

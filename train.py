@@ -17,6 +17,8 @@ def get_args():
     parser.add_argument('--run_name', type=str, default="run_1", help='name of current run')
     parser.add_argument('--model_name', type=str, default="first_train", help='name of the model to be saved/loaded')
 
+    parser.add_argument('--annotations_file', type=str, default="instances_all.json", help='name of the annotations file')
+
     parser.add_argument('--epochs', type=int, default=10, help='number of epochs')
     parser.add_argument('--batch_size', type=int, default=8, help='number of elements in batch size')
     parser.add_argument('--workers', type=int, default=2, help='number of workers in data loader')
@@ -29,6 +31,7 @@ def get_args():
     parser.add_argument('--checkpoint_path', type=str, default='./', help='path were to save the trained model')
 
     parser.add_argument('--resume_train', action='store_true', help='load the model from checkpoint before training')
+
 
     return parser.parse_args()
 
@@ -49,7 +52,7 @@ def main(args):
         '__background__', '1','2','3','4','5','6','7','8','9','10','11','12','13'
     ]
 
-    ANN_FILE_NAME = "modanet2018_instances_train.json"
+    ANN_FILE_NAME = args.annotations_file
     # location to save model and plots
     OUT_DIR = args.checkpoint_path
 
