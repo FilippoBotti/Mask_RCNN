@@ -32,22 +32,32 @@ MASK_COLORS=[
 
 
 def show(imgs):
-    if(len(imgs)!=3):
+    if(len(imgs)!=6):
         print("Not correct size", len(imgs))
         return
     
     print('RED   bag\nGREEN	belt\nBLUE	boots\nYELLOW	footwear\nMAGENTA	outer\nCIANO	dress\nMARRONE	sunglasses\nOLIVA	pants\nNAVY top\nOLIVE DRAB	shorts\nVIOLA	skirt\nTEAL	headwear\nARGENTO	scarf\n')
-    plt.subplot(1,3,1)
+    plt.subplot(2,3,1)
     plt.imshow(np.squeeze(imgs[0].cpu().numpy()).transpose(1,2,0))
     plt.title('Original Image')
     plt.axis('off')
-    plt.subplot(1,3,2)
+    plt.subplot(2,3,2)
     plt.imshow(imgs[1].cpu().numpy().transpose(1,2,0))
     plt.title('Prediction')
     plt.axis('off')
-    plt.subplot(1,3,3)
+    plt.subplot(2,3,3)
     plt.imshow(imgs[2].cpu().numpy().transpose(1,2,0))
     plt.title('Original Mask')
+    plt.axis('off')
+
+    plt.subplot(2,3,4)
+    plt.imshow(imgs[3].cpu().numpy().transpose(1,2,0))
+    plt.axis('off')
+    plt.subplot(2,3,5)
+    plt.imshow(imgs[4].cpu().numpy().transpose(1,2,0))
+    plt.axis('off')
+    plt.subplot(2,3,6)
+    plt.imshow(imgs[5].cpu().numpy().transpose(1,2,0))
     plt.axis('off')
     plt.show()
 
@@ -83,18 +93,47 @@ def visualize_sample(image, target, classes):
             img, label, (int(box[0]), int(box[1]-5)), 
             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2
         )
-    # print("asd",(target['masks']>0).size())
-    # for i in range(len(target['masks'])):
-    #     msk=target['masks'][i,0].detach().cpu().numpy()
-    #     scr=target['scores'][i].detach().cpu().numpy()
-    #     if scr>0.8 :
-
     mask = draw_segmentation_masks(original_img,target['masks']>0)
     images = [original_img, torch.from_numpy(img).permute(2,0,1), mask]
 
     return images
 
+def visualize_bbox(image, prediction, target, classes):
+    image = ((image - image.min()) * (1/(image.max() - image.min()) * 255)).byte()
+    bbox_img = np.array(to_pil(torch.zeros_like(image))).copy()
+    real_bbox_img = np.array(to_pil(torch.zeros_like(image))).copy()
+    for i in range(len(prediction[0]['boxes'])):
+        box=prediction[0]['boxes'][i].detach().cpu()
+        scr=prediction[0]['scores'][i].detach().cpu()
+        label = classes[prediction[0]['labels'][i].detach().cpu()]
+        if scr>0.8:
+            #print(box)
+            cv2.rectangle(
+            bbox_img, 
+            (int(box[0]), int(box[1])), (int(box[2]), int(box[3])),
+            (0, 255, 0), 2
+        )
 
+            cv2.putText(
+            bbox_img, label, (int(box[0]), int(box[1]-5)), 
+            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2
+        )
+    for box_num in range(len(target['boxes'])):
+        box = target['boxes'][box_num]
+        label = classes[target['labels'][box_num]]
+        
+
+        cv2.rectangle(
+            real_bbox_img, 
+            (int(box[0]), int(box[1])), (int(box[2]), int(box[3])),
+            (0, 255, 0), 2
+        )
+        cv2.putText(
+            real_bbox_img, label, (int(box[0]), int(box[1]-5)), 
+            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2
+        )
+    images = [image, torch.from_numpy(bbox_img).permute(2,0,1), torch.from_numpy(real_bbox_img).permute(2,0,1)]
+    return images
 
 def visualize_mask(image, prediction, target):
     image = ((image - image.min()) * (1/(image.max() - image.min()) * 255)).byte()
@@ -106,7 +145,7 @@ def visualize_mask(image, prediction, target):
         msk=prediction[0]['masks'][i,0].detach().cpu()
         scr=prediction[0]['scores'][i].detach().cpu()
         label = prediction[0]['labels'][i].detach().cpu()
-        if scr>0.1:
+        if scr>0.8:
             mask = draw_segmentation_masks(mask,msk>0.5,1, MASK_COLORS[label-1])
     
     for i in range(len(target['masks'])):
