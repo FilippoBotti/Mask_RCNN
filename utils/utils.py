@@ -121,7 +121,6 @@ def visualize_bbox(image, prediction, target, classes):
     for box_num in range(len(target['boxes'])):
         box = target['boxes'][box_num]
         label = classes[target['labels'][box_num]]
-        
 
         cv2.rectangle(
             real_bbox_img, 

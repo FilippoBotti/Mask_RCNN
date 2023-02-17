@@ -166,7 +166,7 @@ class Solver(object):
             images, targets = data
             self.net.eval()
             prediction = self.net([images[0]])
-            # print(predictions)
+            print(targets[0]['labels'])
             results = visualize_bbox(images[0],prediction,targets[0],self.classes)
             results += visualize_mask(images[0],prediction,targets[0])
             show(results)
