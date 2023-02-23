@@ -1,6 +1,6 @@
 import torchvision
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
-from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
+from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor, MaskRCNN_ResNet50_FPN_Weights
 import torch.nn as nn
 import torch
 
@@ -49,7 +49,7 @@ import matplotlib.pyplot as plt
 class Mask_RCNN(nn.Module):
     def __init__(self, num_classes, hidden_layer=256):
         super(Mask_RCNN, self).__init__()
-        self.model = torchvision.models.detection.maskrcnn_resnet50_fpn(pretrained=True)
+        self.model = torchvision.models.detection.maskrcnn_resnet50_fpn(weights=MaskRCNN_ResNet50_FPN_Weights.COCO_V1)
         self.in_features = self.model.roi_heads.box_predictor.cls_score.in_features
         self.in_features_mask = self.model.roi_heads.mask_predictor.conv5_mask.in_channels
 

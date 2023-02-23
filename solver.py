@@ -124,11 +124,11 @@ class Solver(object):
 
             val_loss_list = self.validate()
 
-            print(f"Epoch #{epoch+1} train loss: {sum(train_loss_list)//len(self.train_loader):.3f}")   
-            print(f"Epoch #{epoch+1} validation loss: {sum(val_loss_list)//len(self.valid_loader):.3f}")  
+            print(f"Epoch #{epoch+1} train loss: {sum(train_loss_list)/len(self.train_loader):.3f}")   
+            print(f"Epoch #{epoch+1} validation loss: {sum(val_loss_list)/len(self.valid_loader):.3f}")  
 
             self.writer.add_scalar('validation loss',
-                        sum(val_loss_list)//len(self.valid_loader),epoch)
+                        sum(val_loss_list)/len(self.valid_loader),epoch)
             end = time.time()
             print(f"Took {((end - start) / 60):.3f} minutes for epoch {epoch}")
 
