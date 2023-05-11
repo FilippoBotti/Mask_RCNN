@@ -17,7 +17,7 @@ def get_args():
     parser.add_argument('--run_name', type=str, default="run_1", help='name of current run')
     parser.add_argument('--model_name', type=str, default="first_train", help='name of the model to be saved/loaded')
 
-    parser.add_argument('--annotations_file', type=str, default="instances_all.json", help='name of the annotations file')
+    parser.add_argument('--annotations_file', type=str, default="modanet2018_instances_train.json", help='name of the annotations file')
 
     parser.add_argument('--epochs', type=int, default=10, help='number of epochs')
     parser.add_argument('--batch_size', type=int, default=8, help='number of elements in batch size')
@@ -31,6 +31,8 @@ def get_args():
     parser.add_argument('--checkpoint_path', type=str, default='./', help='path were to save the trained model')
 
     parser.add_argument('--resume_train', action='store_true', help='load the model from checkpoint before training')
+
+    parser.add_argument('--test', type=bool, default=False, help='load the model from checkpoint and test it.')
 
 
     return parser.parse_args()

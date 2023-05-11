@@ -26,26 +26,29 @@ class Solver(object):
 
         self.net = Mask_RCNN(self.num_classes).to(device)
 
-        # load a pretrained model
-        if self.args.resume_train == True:
-            self.load_model()
-        
-        # Choose optimizer
-        params = [p for p in self.net.parameters() if p.requires_grad]
-        names = [n for n,p in self.net.named_parameters() if p.requires_grad]
-        print(names)
-        if self.args.opt == "SGD":
-            self.optimizer = optim.SGD(params, lr=self.args.lr)
-        elif self.args.opt == "Adam":
-            self.optimizer = optim.Adam(params, lr=self.args.lr)
-
-        self.epochs = self.args.epochs
         self.train_loader = train_loader
         self.valid_loader = valid_loader
         self.test_loader = test_loader
 
         self.device = device
-        self.writer = writer
+
+        # load a pretrained model
+        if self.args.resume_train == True or self.args.test:
+            self.load_model()
+        
+        if(self.args.test == False):
+
+            # Choose optimizer
+            params = [p for p in self.net.parameters() if p.requires_grad]
+            names = [n for n,p in self.net.named_parameters() if p.requires_grad]
+            #print(names)
+            if self.args.opt == "SGD":
+                self.optimizer = optim.SGD(params, lr=self.args.lr)
+            elif self.args.opt == "Adam":
+                self.optimizer = optim.Adam(params, lr=self.args.lr)
+
+            self.epochs = self.args.epochs
+            self.writer = writer
 
     def save_model(self):
         # if you want to save the model
@@ -161,7 +164,7 @@ class Solver(object):
         return val_loss_list
     
     def test(self):
-        print("Testing")
+        print("Testing qui")
         for data in self.test_loader:
             images, targets = data
             self.net.eval()
