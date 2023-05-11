@@ -50,9 +50,10 @@ class Solver(object):
             self.epochs = self.args.epochs
             self.writer = writer
 
-    def save_model(self):
+    def save_model(self, epoch):
         # if you want to save the model
-        check_path = os.path.join(self.args.checkpoint_path, self.model_name)
+        checkpoint_name = self.model_name + epoch
+        check_path = os.path.join(self.args.checkpoint_path, checkpoint_name)
         torch.save(self.net.state_dict(), check_path)
         print("Model saved!")
 
@@ -135,7 +136,7 @@ class Solver(object):
             end = time.time()
             print(f"Took {((end - start) / 60):.3f} minutes for epoch {epoch}")
 
-            self.save_model()
+            self.save_model(epoch)
         self.writer.flush()
         self.writer.close()
         print('Finished Training')  
