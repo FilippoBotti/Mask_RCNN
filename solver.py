@@ -52,7 +52,7 @@ class Solver(object):
 
     def save_model(self, epoch):
         # if you want to save the model
-        checkpoint_name = self.model_name + epoch
+        checkpoint_name = self.model_name + str(epoch)
         check_path = os.path.join(self.args.checkpoint_path, checkpoint_name)
         torch.save(self.net.state_dict(), check_path)
         print("Model saved!")
