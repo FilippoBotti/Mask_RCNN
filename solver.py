@@ -11,6 +11,7 @@ from torchvision.utils import draw_segmentation_masks, make_grid
 import matplotlib.pyplot as plt
 import torchvision
 import cv2, random, numpy as np
+from pytorchtools import EarlyStopping
 
 class Solver(object):
     """Solver for training and testing."""
@@ -65,6 +66,9 @@ class Solver(object):
     
     def train(self):
         self.net.train()
+        self.train_loss = []
+        self.val_loss = []
+        early_stopping = EarlyStopping(patience=2, verbose=True)
         for epoch in range(self.epochs):
             print(f"\nEPOCH {epoch+1} of {self.epochs}")
             running_loss = 0.0
@@ -82,7 +86,6 @@ class Solver(object):
                 "loss_objectness": 0,
                 "loss_rpn_box_reg": 0
             }
-
             for i, data in enumerate(prog_bar):
                 self.optimizer.zero_grad()
                 images, targets = data
@@ -125,11 +128,14 @@ class Solver(object):
                         "loss_objectness": 0,
                         "loss_rpn_box_reg": 0
                     }
-
+                break
             val_loss_list = self.validate()
 
             print(f"Epoch #{epoch+1} train loss: {sum(train_loss_list)/len(self.train_loader):.3f}")   
             print(f"Epoch #{epoch+1} validation loss: {sum(val_loss_list)/len(self.valid_loader):.3f}")  
+
+            self.train_loss.append(sum(train_loss_list)/len(self.train_loader));
+            self.val_loss.append(sum(val_loss_list)/len(self.valid_loader));
 
             self.writer.add_scalar('validation loss',
                         sum(val_loss_list)/len(self.valid_loader),epoch)
@@ -137,11 +143,18 @@ class Solver(object):
             print(f"Took {((end - start) / 60):.3f} minutes for epoch {epoch}")
 
             self.save_model(epoch)
+            early_stopping(self.val_loss, self.model)
+        
+            if early_stopping.early_stop:
+                print("Early stopping")
+                break
+        
+            
         self.writer.flush()
         self.writer.close()
         print('Finished Training')  
         #self.test() 
-    
+
     def validate(self):
         print('Validating')
         val_itr = 0
@@ -161,6 +174,7 @@ class Solver(object):
             val_itr += 1
             # update the loss value beside the progress bar for each iteration
             prog_bar.set_description(desc=f"Loss: {loss_value:.4f}\n\n")
+            break
         self.net.train()
         return val_loss_list
     
