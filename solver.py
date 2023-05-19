@@ -11,7 +11,7 @@ from torchvision.utils import draw_segmentation_masks, make_grid
 import matplotlib.pyplot as plt
 import torchvision
 import cv2, random, numpy as np
-from pytorchtools import EarlyStopping
+from utils.pytorchtools import EarlyStopping
 
 class Solver(object):
     """Solver for training and testing."""
