@@ -128,7 +128,6 @@ class Solver(object):
                         "loss_objectness": 0,
                         "loss_rpn_box_reg": 0
                     }
-                break
             val_loss_list = self.validate()
 
             print(f"Epoch #{epoch+1} train loss: {sum(train_loss_list)/len(self.train_loader):.3f}")   
@@ -174,7 +173,6 @@ class Solver(object):
             val_itr += 1
             # update the loss value beside the progress bar for each iteration
             prog_bar.set_description(desc=f"Loss: {loss_value:.4f}\n\n")
-            break
         self.net.train()
         return val_loss_list
     
