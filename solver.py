@@ -142,7 +142,7 @@ class Solver(object):
             print(f"Took {((end - start) / 60):.3f} minutes for epoch {epoch}")
 
             self.save_model(epoch)
-            early_stopping(self.val_loss, self.model)
+            early_stopping(self.val_loss, self.net)
         
             if early_stopping.early_stop:
                 print("Early stopping")
