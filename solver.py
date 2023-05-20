@@ -6,7 +6,7 @@ import time
 from tqdm import tqdm
 import sys
 from models.mask_rcnn import Mask_RCNN
-from utils.utils import  visualize_mask, show, visualize_bbox
+from utils.utils import  visualize_mask, show, visualize_bbox, predicted_bbox, predicted_mask
 from torchvision.utils import draw_segmentation_masks, make_grid
 import matplotlib.pyplot as plt
 import torchvision
@@ -140,7 +140,7 @@ class Solver(object):
                         sum(val_loss_list)/len(self.valid_loader),epoch)
             end = time.time()
             print(f"Took {((end - start) / 60):.3f} minutes for epoch {epoch}")
-
+            self.test(epoch)
             self.save_model(epoch)
             early_stopping(sum(val_loss_list)/len(self.valid_loader), self.net)
         
@@ -176,13 +176,20 @@ class Solver(object):
         self.net.train()
         return val_loss_list
     
-    def test(self):
-        print("Testing qui")
+    def test(self, epoch):
+        print("Testing")
+        i = 0
         for data in self.test_loader:
+            if(i==5):
+                break
             images, targets = data
             self.net.eval()
             prediction = self.net([images[0]])
             print(targets[0]['labels'])
-            results = visualize_bbox(images[0],prediction,targets[0],self.classes)
-            results += visualize_mask(images[0],prediction,targets[0])
-            show(results)
+            results = predicted_bbox(images[0],prediction,self.classes)
+            results += predicted_mask(images[0],prediction)
+            concatenation = np.concatenate((results[0],results[1],results[2]), axis=1)
+            image_name = str(epoch) + "_" + str(i) + "_image"
+            self.writer.add_image(image_name, concatenation)
+            i+=1
+            

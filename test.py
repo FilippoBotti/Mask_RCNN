@@ -84,9 +84,6 @@ def main(args):
         dataset_test, batch_size=BATCH_SIZE, shuffle=False, num_workers=NUM_WORKERS,
         collate_fn=collate_fn)
 
-    print(indices[:-9372])
-    print(len(dataset_valid.indices))
-    print(len(dataset_test.indices))
 
     # model = Mask_RCNN(NUM_CLASSES)
     # print(model)
@@ -96,7 +93,7 @@ def main(args):
     # # optimizer = torch.optim.AdamW(params=model.parameters(), lr=1e-5)
 
     #device = torch.device("cuda")
-    print("Device: ", DEVICE)
+    print("Device:", DEVICE)
 
     # define solver class
     solver = Solver(train_loader=data_loader,
@@ -108,7 +105,7 @@ def main(args):
             classes = CLASSES)
 
     # TRAIN model
-    solver.train()
+    solver.test()
 
 if __name__ == "__main__":
     args = get_args()
