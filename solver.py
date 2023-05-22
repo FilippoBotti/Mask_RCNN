@@ -184,7 +184,8 @@ class Solver(object):
                 break
             images, targets = data
             self.net.eval()
-            prediction = self.net([images[0]])
+            test_img = images[0].to(self.device)
+            prediction = self.net(test_img)
             print(targets[0]['labels'])
             results = predicted_bbox(images[0],prediction,self.classes)
             results += predicted_mask(images[0],prediction)
