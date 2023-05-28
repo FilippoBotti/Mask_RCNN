@@ -140,7 +140,7 @@ class Solver(object):
                         sum(val_loss_list)/len(self.valid_loader),epoch)
             end = time.time()
             print(f"Took {((end - start) / 60):.3f} minutes for epoch {epoch}")
-            self.test(epoch)
+            #self.test(epoch)
             self.save_model(epoch)
             early_stopping(sum(val_loss_list)/len(self.valid_loader), self.net)
         
