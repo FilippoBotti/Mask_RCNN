@@ -39,9 +39,17 @@ class Solver(object):
         
         if(self.args.test == False):
 
-            # Choose optimizer
-            params = [p for p in self.net.parameters() if p.requires_grad]
-            names = [n for n,p in self.net.named_parameters() if p.requires_grad]
+            # Choose optimizer 
+            if self.args.pretrained:
+                params = [p for p in self.net.parameters() if p.requires_grad]
+                names = [n for n,p in self.net.named_parameters() if p.requires_grad]
+            else:
+                for param in self.net.parameters():
+                    param.requires_grad = True
+                params = [p for p in self.net.parameters()]
+                names = [n for n,p in self.net.named_parameters() ]
+            for n,p in self.net.named_parameters():
+                print(n, p.requires_grad)
             #print(names)
             if self.args.opt == "SGD":
                 self.optimizer = optim.SGD(params, lr=self.args.lr)
