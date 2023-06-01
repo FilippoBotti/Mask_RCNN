@@ -32,10 +32,10 @@ def get_args():
 
     parser.add_argument('--resume_train', action='store_true', help='load the model from checkpoint before training')
 
-    parser.add_argument('--test', type=bool, default=False, help='load the model from checkpoint and test it.')
+    parser.add_argument('--test', action='store_true', help='load the model from checkpoint and test it.')
 
 
-    parser.add_argument('--pretrained', type=bool, default=False, help='load pretrained coco weights.')
+    parser.add_argument('--pretrained', action='store_true', help='load pretrained coco weights.')
     parser.add_argument('--weights_path', type=str, default="", help='pretrained weights\' path')
 
     return parser.parse_args()
@@ -108,7 +108,7 @@ def main(args):
             classes = CLASSES)
 
     # TRAIN model
-    #solver.test()
+    solver.eval()
 
 if __name__ == "__main__":
     args = get_args()

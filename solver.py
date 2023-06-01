@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import torchvision
 import cv2, random, numpy as np
 from utils.pytorchtools import EarlyStopping
+from utils.engine import evaluate
 
 class Solver(object):
     """Solver for training and testing."""
@@ -34,7 +35,7 @@ class Solver(object):
         self.device = device
 
         # load a pretrained model
-        if self.args.resume_train == True or self.args.test:
+        if self.args.resume_train or self.args.test:
             self.load_model()
         
         if(self.args.test == False):
@@ -69,7 +70,7 @@ class Solver(object):
     def load_model(self):
         # function to load the model
         check_path = os.path.join(self.args.checkpoint_path, self.model_name)
-        self.net.load_state_dict(torch.load(check_path, map_location=torch.device('cpu')))
+        self.net.load_state_dict(torch.load(check_path, map_location=torch.device(self.device)))
         print("Model loaded!", flush=True)
     
     def train(self):
@@ -202,3 +203,5 @@ class Solver(object):
             # self.writer.add_image(image_name, concatenation)
             i+=1
             
+    def eval(self):
+        evaluate(self.net, self.test_loader, device=self.device)
