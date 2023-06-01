@@ -25,7 +25,7 @@ class Solver(object):
         self.classes = classes
         self.num_classes = len(self.classes)
 
-        self.net = Mask_RCNN(self.num_classes).to(device)
+        self.net = Mask_RCNN(self.num_classes, self.args).to(device)
 
         self.train_loader = train_loader
         self.valid_loader = valid_loader
