@@ -36,7 +36,7 @@ def get_args():
 
 
     parser.add_argument('--pretrained', type=bool, default=False, help='load pretrained coco weights.')
-    parser.add_argument('--weights_path', type=str, default="./", help='pretrained weights\' path')
+    parser.add_argument('--weights_path', type=str, default="", help='pretrained weights\' path')
 
     return parser.parse_args()
 
@@ -108,7 +108,7 @@ def main(args):
             classes = CLASSES)
 
     # TRAIN model
-    solver.test()
+    #solver.test()
 
 if __name__ == "__main__":
     args = get_args()

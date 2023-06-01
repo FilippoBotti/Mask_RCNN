@@ -176,7 +176,7 @@ class Solver(object):
         self.net.train()
         return val_loss_list
     
-    def test(self, epoch):
+    def test(self):
         print("Testing", flush=True)
         i = 0
         for data in self.test_loader:
@@ -190,7 +190,7 @@ class Solver(object):
             results = predicted_bbox(images[0],prediction,self.classes)
             results += predicted_mask(images[0],prediction)
             concatenation = np.concatenate((results[0],results[1],results[2]), axis=1)
-            image_name = str(epoch) + "_" + str(i) + "_image"
-            self.writer.add_image(image_name, concatenation)
+            # image_name = str(epoch) + "_" + str(i) + "_image"
+            # self.writer.add_image(image_name, concatenation)
             i+=1
             
