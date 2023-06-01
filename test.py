@@ -108,7 +108,7 @@ def main(args):
             classes = CLASSES)
 
     # TRAIN model
-    #solver.test()
+    solver.test()
 
 if __name__ == "__main__":
     args = get_args()

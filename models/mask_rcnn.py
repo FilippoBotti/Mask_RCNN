@@ -53,6 +53,7 @@ class Mask_RCNN(nn.Module):
             self.model = torchvision.models.detection.maskrcnn_resnet50_fpn()
             coco_file = os.path.join(args.weights_path, "maskrcnn_resnet50_fpn_coco.pth")
             self.model.load_state_dict(torch.load(coco_file))
+            print("Loaded pretrained weights", flush=True)
         else:
             self.model = torchvision.models.detection.maskrcnn_resnet50_fpn(weights=MaskRCNN_ResNet50_FPN_Weights.COCO_V1)
         self.in_features = self.model.roi_heads.box_predictor.cls_score.in_features

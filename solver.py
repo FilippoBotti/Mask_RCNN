@@ -62,7 +62,7 @@ class Solver(object):
         # function to load the model
         check_path = os.path.join(self.args.checkpoint_path, self.model_name)
         self.net.load_state_dict(torch.load(check_path, map_location=torch.device('cpu')))
-        print("Model loaded!")
+        print("Model loaded!", flush=True)
     
     def train(self):
         self.net.train()
@@ -70,11 +70,11 @@ class Solver(object):
         self.val_loss = []
         early_stopping = EarlyStopping(patience=2, verbose=True)
         for epoch in range(self.epochs):
-            print(f"\nEPOCH {epoch+1} of {self.epochs}")
+            print(f"\nEPOCH {epoch+1} of {self.epochs}", flush=True)
             running_loss = 0.0
             # start timer and carry out training and validation
             start = time.time()
-            print('Solver Training')
+            print('Solver Training', flush=True)
             train_loss_list = []
             
             # initialize tqdm progress bar
@@ -130,8 +130,8 @@ class Solver(object):
                     }
             val_loss_list = self.validate()
 
-            print(f"Epoch #{epoch+1} train loss: {sum(train_loss_list)/len(self.train_loader):.3f}")   
-            print(f"Epoch #{epoch+1} validation loss: {sum(val_loss_list)/len(self.valid_loader):.3f}")  
+            print(f"Epoch #{epoch+1} train loss: {sum(train_loss_list)/len(self.train_loader):.3f}", flush=True)   
+            print(f"Epoch #{epoch+1} validation loss: {sum(val_loss_list)/len(self.valid_loader):.3f}", flush=True)  
 
             self.train_loss.append(sum(train_loss_list)/len(self.train_loader));
             self.val_loss.append(sum(val_loss_list)/len(self.valid_loader));
@@ -139,19 +139,19 @@ class Solver(object):
             self.writer.add_scalar('validation loss',
                         sum(val_loss_list)/len(self.valid_loader),epoch)
             end = time.time()
-            print(f"Took {((end - start) / 60):.3f} minutes for epoch {epoch}")
+            print(f"Took {((end - start) / 60):.3f} minutes for epoch {epoch}", flush=True)
             #self.test(epoch)
             self.save_model(epoch)
             early_stopping(sum(val_loss_list)/len(self.valid_loader), self.net)
         
             if early_stopping.early_stop:
-                print("Early stopping")
+                print("Early stopping", flush=True)
                 break
         
             
         self.writer.flush()
         self.writer.close()
-        print('Finished Training')  
+        print('Finished Training', flush=True)  
         #self.test() 
 
     def validate(self):
@@ -177,7 +177,7 @@ class Solver(object):
         return val_loss_list
     
     def test(self, epoch):
-        print("Testing")
+        print("Testing", flush=True)
         i = 0
         for data in self.test_loader:
             if(i==5):
@@ -186,7 +186,7 @@ class Solver(object):
             self.net.eval()
             test_img = images[0].to(self.device)
             prediction = self.net(test_img)
-            print(targets[0]['labels'])
+            print(targets[0]['labels'], flush=True)
             results = predicted_bbox(images[0],prediction,self.classes)
             results += predicted_mask(images[0],prediction)
             concatenation = np.concatenate((results[0],results[1],results[2]), axis=1)
