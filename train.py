@@ -40,7 +40,7 @@ def get_args():
     return parser.parse_args()
 
 def main(args):
-    SummaryWriter(args.checkpoint_path + '/runs/' + args.run_name + args.opt)
+    writer = SummaryWriter(args.checkpoint_path + '/runs/' + args.run_name + args.opt)
 
     BATCH_SIZE = args.batch_size # increase / decrease according to GPU memeory
     NUM_WORKERS = args.workers
