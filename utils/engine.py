@@ -7,7 +7,7 @@ import torchvision.models.detection.mask_rcnn
 import utils.vision_utils as vision_utils
 from utils.coco_eval import CocoEvaluator
 from utils.coco_utils import get_coco_api_from_dataset
-import tqdm
+
 
 def train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq, scaler=None):
     model.train()
@@ -77,7 +77,7 @@ def evaluate(model, data_loader, device):
     n_threads = torch.get_num_threads()
     # FIXME remove this and make paste_masks_in_image run on the GPU
     torch.set_num_threads(1)
-    cpu_device = torch.device("cpu")
+    cpu_device = torch.device(device)
     model.eval()
     metric_logger = vision_utils.MetricLogger(delimiter="  ")
     header = "Test:"
@@ -85,8 +85,8 @@ def evaluate(model, data_loader, device):
     coco = get_coco_api_from_dataset(data_loader.dataset)
     iou_types = _get_iou_types(model)
     coco_evaluator = CocoEvaluator(coco, iou_types)
-
-    for images, targets in tqdm(metric_logger.log_every(data_loader, 100, header)):
+    print("Start evaluating", flush=True)
+    for images, targets in metric_logger.log_every(data_loader, 100, header):
         images = list(img.to(device) for img in images)
         if torch.cuda.is_available():
             torch.cuda.synchronize()
