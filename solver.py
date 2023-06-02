@@ -13,6 +13,7 @@ import torchvision
 import cv2, random, numpy as np
 from utils.pytorchtools import EarlyStopping
 from utils.engine import evaluate
+from torchmetrics.detection.mean_ap import MeanAveragePrecision
 
 class Solver(object):
     """Solver for training and testing."""
@@ -204,4 +205,15 @@ class Solver(object):
             i+=1
             
     def eval(self):
-        evaluate(self.net, self.test_loader, device=self.device)
+        #evaluate(self.net, self.test_loader, device=self.device)
+        self.net.eval()
+        metric = MeanAveragePrecision(box_format='xywh',iou_type="bbox")
+        for data in self.test_loader:
+            images, targets = data
+            images = list(image.to(self.device) for image in images)
+            targets = [{k: v.to(self.device) for k, v in t.items()} for t in targets]
+            prediction = self.net(images)
+            metric.update(prediction, targets)
+            print(metric.compute())
+        result = metric.compute()
+        print(result)
