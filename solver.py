@@ -207,7 +207,7 @@ class Solver(object):
     def eval(self):
         #evaluate(self.net, self.test_loader, device=self.device)
         self.net.eval()
-        metric = MeanAveragePrecision(box_format='xywh',iou_type="bbox")
+        metric = MeanAveragePrecision(iou_type="bbox")
         for data in self.test_loader:
             images, targets = data
             images = list(image.to(self.device) for image in images)
