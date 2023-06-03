@@ -32,11 +32,12 @@ def get_args():
 
     parser.add_argument('--resume_train', action='store_true', help='load the model from checkpoint before training')
 
-    parser.add_argument('--test', action='store_true', help='load the model from checkpoint and test it.')
+    parser.add_argument('--test', type=bool, default=False, help='load the model from checkpoint and test it.')
 
-
-    parser.add_argument('--pretrained', action='store_true', help='load pretrained coco weights.')
+    parser.add_argument('--pretrained', type=bool, default=False, help='load pretrained coco weights.')
     parser.add_argument('--weights_path', type=str, default="", help='pretrained weights\' path')
+
+    parser.add_argument('--version', type=str, default='V1', choices=['V1', 'V2'], help = 'maskrcnn version (V1 or improved V2)')
 
     return parser.parse_args()
 

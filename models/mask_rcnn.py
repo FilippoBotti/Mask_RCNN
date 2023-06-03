@@ -50,13 +50,12 @@ class Mask_RCNN(nn.Module):
     def __init__(self, num_classes, args, hidden_layer=256):
         super(Mask_RCNN, self).__init__()
         if args.pretrained:
-            if args.weights_path != "":
-                self.model = torchvision.models.detection.maskrcnn_resnet50_fpn()
-                coco_file = os.path.join(args.weights_path, "maskrcnn_resnet50_fpn_coco.pth")
-                self.model.load_state_dict(torch.load(coco_file))
-            else:
+            if args.version == "V1":
                 self.model = torchvision.models.detection.maskrcnn_resnet50_fpn(weights=True)
-            print("Loaded pretrained weights", flush=True)
+                print("Loaded pretrained weights V1", flush=True)
+            if args.version == "V2":
+                self.model = torchvision.models.detection.maskrcnn_resnet50_fpn_v2(weights=True)
+                print("Loaded pretrained weights V2", flush=True)
         else:
             self.model = torchvision.models.detection.maskrcnn_resnet50_fpn()
         self.in_features = self.model.roi_heads.box_predictor.cls_score.in_features
