@@ -35,11 +35,10 @@ class Solver(object):
         self.device = device
 
         # load a pretrained model
-        if self.args.resume_train or self.args.test:
+        if self.args.resume_train or self.args.mode == "test":
             self.load_model()
         
-        if(self.args.test == False):
-
+        if(self.args.mode == "train"):
             # Choose optimizer 
             if self.args.pretrained:
                 params = [p for p in self.net.parameters() if p.requires_grad]

@@ -32,7 +32,7 @@ def get_args():
 
     parser.add_argument('--resume_train', action='store_true', help='load the model from checkpoint before training')
 
-    parser.add_argument('--test', type=bool, default=False, help='load the model from checkpoint and test it.')
+    parser.add_argument('--mode', type=str, default='train', choices=['train', 'test'], help = 'net mode (train or test)')
 
     parser.add_argument('--pretrained', type=bool, default=False, help='load pretrained coco weights.')
     parser.add_argument('--weights_path', type=str, default="", help='pretrained weights\' path')
@@ -59,8 +59,6 @@ def main(args):
     ]
 
     ANN_FILE_NAME = args.annotations_file
-    # location to save model and plots
-    OUT_DIR = args.checkpoint_path
 
     # use our dataset and defined transformations
     total_dataset = ModaNetDataset(
@@ -92,14 +90,6 @@ def main(args):
     print(len(dataset_valid.indices))
     print(len(dataset_test.indices))
 
-    # model = Mask_RCNN(NUM_CLASSES)
-    # print(model)
-    # model = model.to(DEVICE)
-    # # construct an optimizer
-    # # params = [p for p in model.parameters() if p.requires_grad]
-    # # optimizer = torch.optim.AdamW(params=model.parameters(), lr=1e-5)
-
-    #device = torch.device("cuda")
     print("Device: ", DEVICE)
 
     # define solver class
