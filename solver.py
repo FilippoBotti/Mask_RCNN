@@ -12,7 +12,6 @@ import matplotlib.pyplot as plt
 import torchvision
 import cv2, random, numpy as np
 from utils.pytorchtools import EarlyStopping
-from utils.engine import evaluate
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 
 class Solver(object):
@@ -63,9 +62,13 @@ class Solver(object):
 
     def save_model(self, epoch):
         # if you want to save the model
-        checkpoint_name = self.model_name + str(epoch)
+        checkpoint_name = "epoch" + str(epoch) + "_" + self.model_name
         check_path = os.path.join(self.args.checkpoint_path, checkpoint_name)
-        torch.save(self.net.state_dict(), check_path)
+        torch.save({
+                'epoch': epoch+1,
+                'model_state_dict': self.net.state_dict(),
+                'optimizer_state_dict': self.optimizer.state_dict(),
+                }, check_path)
         print("Model saved!")
 
     def load_model(self):
@@ -205,7 +208,6 @@ class Solver(object):
             i+=1
             
     def eval(self):
-        #evaluate(self.net, self.test_loader, device=self.device)
         self.net.eval()
         metric = MeanAveragePrecision(iou_type="bbox")
         for data in self.test_loader:
