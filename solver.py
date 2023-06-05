@@ -13,11 +13,13 @@ import torchvision
 import cv2, random, numpy as np
 from utils.pytorchtools import EarlyStopping
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
+from torch.utils.tensorboard import SummaryWriter
+
 
 class Solver(object):
     """Solver for training and testing."""
 
-    def __init__(self, train_loader, valid_loader, test_loader, device, writer, classes, args):
+    def __init__(self, train_loader, valid_loader, test_loader, device, classes, args):
         """Initialize configurations."""
         self.args = args
         self.model_name = 'modanet_maskRCNN_{}.pth'.format(self.args.model_name)
@@ -35,29 +37,26 @@ class Solver(object):
         self.device = device
 
         # load a pretrained model
-        if self.args.resume_train or self.args.mode == "test":
+        if self.args.resume_train or self.args.mode in ['test','evaluate']:
             self.load_model()
         
         if(self.args.mode == "train"):
             # Choose optimizer 
             if self.args.pretrained:
                 params = [p for p in self.net.parameters() if p.requires_grad]
-                names = [n for n,p in self.net.named_parameters() if p.requires_grad]
             else:
                 for param in self.net.parameters():
                     param.requires_grad = True
                 params = [p for p in self.net.parameters()]
-                names = [n for n,p in self.net.named_parameters() ]
             for n,p in self.net.named_parameters():
                 print(n, p.requires_grad)
-            #print(names)
             if self.args.opt == "SGD":
                 self.optimizer = optim.SGD(params, lr=self.args.lr)
             elif self.args.opt == "Adam":
                 self.optimizer = optim.Adam(params, lr=self.args.lr)
 
             self.epochs = self.args.epochs
-            self.writer = writer
+            self.writer = SummaryWriter(self.args.checkpoint_path + '/runs/' + self.args.run_name + self.args.opt)
 
     def save_model(self, epoch):
         # if you want to save the model
@@ -188,25 +187,30 @@ class Solver(object):
         self.net.train()
         return val_loss_list
     
-    def test(self):
+    def test(self, img_count=5):
         print("Testing", flush=True)
         i = 0
         for data in self.test_loader:
-            if(i==5):
+            if(i==img_count):
                 break
             images, targets = data
             self.net.eval()
+            #test_img = images[0].to(self.device)
+            #prediction = self.net(test_img)
+            prediction = self.net([images[0]])
             test_img = images[0].to(self.device)
-            prediction = self.net(test_img)
+            prediction = self.net([test_img])
+            print(prediction)
             print(targets[0]['labels'], flush=True)
             results = predicted_bbox(images[0],prediction,self.classes)
             results += predicted_mask(images[0],prediction)
             concatenation = np.concatenate((results[0],results[1],results[2]), axis=1)
             # image_name = str(epoch) + "_" + str(i) + "_image"
             # self.writer.add_image(image_name, concatenation)
+            show(results)
             i+=1
             
-    def eval(self):
+    def evaluate(self):
         self.net.eval()
         metric = MeanAveragePrecision(iou_type="bbox")
         for data in self.test_loader:

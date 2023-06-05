@@ -7,7 +7,6 @@ from models.mask_rcnn import Mask_RCNN
 
 from utils.utils import get_train_transform,get_valid_transform, collate_fn
 import argparse
-from torch.utils.tensorboard import SummaryWriter
 
 from solver import Solver
 
@@ -20,8 +19,8 @@ def get_args():
     parser.add_argument('--annotations_file', type=str, default="modanet2018_instances_train.json", help='name of the annotations file')
 
     parser.add_argument('--epochs', type=int, default=10, help='number of epochs')
-    parser.add_argument('--batch_size', type=int, default=8, help='number of elements in batch size')
-    parser.add_argument('--workers', type=int, default=2, help='number of workers in data loader')
+    parser.add_argument('--batch_size', type=int, default=16, help='number of elements in batch size')
+    parser.add_argument('--workers', type=int, default=4, help='number of workers in data loader')
     parser.add_argument('--print_every', type=int, default=500, help='print losses every N iteration')
 
     parser.add_argument('--lr', type=float, default=1e-5, help='learning rate')
@@ -32,17 +31,16 @@ def get_args():
 
     parser.add_argument('--resume_train', action='store_true', help='load the model from checkpoint before training')
 
-    parser.add_argument('--mode', type=str, default='train', choices=['train', 'test'], help = 'net mode (train or test)')
+    parser.add_argument('--mode', type=str, default='train', choices=['train', 'test', 'evaluate'], help = 'net mode (train or test)')
 
     parser.add_argument('--pretrained', type=bool, default=False, help='load pretrained coco weights.')
-    parser.add_argument('--weights_path', type=str, default="", help='pretrained weights\' path')
 
     parser.add_argument('--version', type=str, default='V1', choices=['V1', 'V2'], help = 'maskrcnn version (V1 or improved V2)')
 
     return parser.parse_args()
 
 def main(args):
-    writer = SummaryWriter('./runs/' + args.run_name + args.opt)
+    
 
     BATCH_SIZE = args.batch_size # increase / decrease according to GPU memeory
     NUM_WORKERS = args.workers
@@ -59,8 +57,6 @@ def main(args):
     ]
 
     ANN_FILE_NAME = args.annotations_file
-    # location to save model and plots
-    OUT_DIR = args.checkpoint_path
 
     # use our dataset and defined transformations
     total_dataset = ModaNetDataset(
@@ -88,28 +84,29 @@ def main(args):
         dataset_test, batch_size=BATCH_SIZE, shuffle=False, num_workers=NUM_WORKERS,
         collate_fn=collate_fn)
 
+    print(len(dataset.indices))
+    print(len(dataset_valid.indices))
+    print(len(dataset_test.indices))
 
-    # model = Mask_RCNN(NUM_CLASSES)
-    # print(model)
-    # model = model.to(DEVICE)
-    # # construct an optimizer
-    # # params = [p for p in model.parameters() if p.requires_grad]
-    # # optimizer = torch.optim.AdamW(params=model.parameters(), lr=1e-5)
-
-    #device = torch.device("cuda")
-    print("Device:", DEVICE)
+    print("Device: ", DEVICE)
 
     # define solver class
     solver = Solver(train_loader=data_loader,
             valid_loader=data_loader_valid,
             test_loader=data_loader_test,
             device=DEVICE,
-            writer=writer,
             args=args,
             classes = CLASSES)
 
     # TRAIN model
-    solver.test()
+    if args.mode == "train":
+        solver.train()
+    elif args.mode == "test":
+        solver.test()
+    elif args.mode == "evaluate":
+        solver.evaluate()
+    else:
+        raise ValueError("Not valid mode")
 
 if __name__ == "__main__":
     args = get_args()

@@ -37,7 +37,7 @@ def show(imgs):
     concatenation = np.concatenate((imgs[0],imgs[1],imgs[2]), axis=1)
     plt.imshow(concatenation)  
     plt.show()
-    writer.add_image('four_fashion_mnist_images', concatenation)
+    #writer.add_image('four_fashion_mnist_images', concatenation)
 # show images
     # matplotlib_imshow(img_grid, one_channel=True)
     #print('RED   bag\nGREEN	belt\nBLUE	boots\nYELLOW	footwear\nMAGENTA	outer\nCIANO	dress\nMARRONE	sunglasses\nOLIVA	pants\nNAVY top\nOLIVE DRAB	shorts\nVIOLA	skirt\nTEAL	headwear\nARGENTO	scarf\n')
@@ -198,12 +198,4 @@ def get_valid_transform():
         T.ConvertImageDtype(torch.float)
     ])
 
-def save_model(epoch, model, optimizer):
-    """
-    https://drive.google.com/file/d/1W_GRxnTfgGarIvobS7CJDCjcO9Hc6drg/view
-    """
-    torch.save({
-                'epoch': epoch+1,
-                'model_state_dict': model.state_dict(),
-                'optimizer_state_dict': optimizer.state_dict(),
-                }, 'res/mask_rcnn.pth')
+
