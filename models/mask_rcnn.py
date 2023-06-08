@@ -90,7 +90,6 @@ class Mask_RCNN(nn.Module):
 
             self.model.roi_heads = new_roi_heads
 
-        print(self.model.roi_heads)
 
     def forward(self, images, targets=None):
         return self.model(images,targets)

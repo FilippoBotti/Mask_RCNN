@@ -48,8 +48,8 @@ class Solver(object):
                 for param in self.net.parameters():
                     param.requires_grad = True
                 params = [p for p in self.net.parameters()]
-            # for n,p in self.net.named_parameters():
-            #     print(n, p.requires_grad)
+            for n,p in self.net.named_parameters():
+                print(n, p.requires_grad)
             if self.args.opt == "SGD":
                 self.optimizer = optim.SGD(params, lr=self.args.lr)
             elif self.args.opt == "Adam":
@@ -62,11 +62,7 @@ class Solver(object):
         # if you want to save the model
         checkpoint_name = "epoch" + str(epoch) + "_" + self.model_name
         check_path = os.path.join(self.args.checkpoint_path, checkpoint_name)
-        torch.save({
-                'epoch': epoch+1,
-                'model_state_dict': self.net.state_dict(),
-                'optimizer_state_dict': self.optimizer.state_dict(),
-                }, check_path)
+        torch.save(self.net.state_dict(), check_path)
         print("Model saved!")
 
     def load_model(self):
@@ -122,7 +118,6 @@ class Solver(object):
                     loss_dict_tb[loss] += loss_dict[loss].item()
 
                 del losses, loss_dict, loss_value
-
                 if i % self.args.print_every == self.args.print_every - 1:  
                     print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / self.args.print_every:.3f}')
 
@@ -143,6 +138,8 @@ class Solver(object):
                         "loss_objectness": 0,
                         "loss_rpn_box_reg": 0
                     }
+                    if self.args.cls_accessory:
+                        loss_dict_tb["loss_accessory"]=0
             val_loss_list = self.validate()
 
             print(f"Epoch #{epoch+1} train loss: {sum(train_loss_list)/len(self.train_loader):.3f}", flush=True)   
