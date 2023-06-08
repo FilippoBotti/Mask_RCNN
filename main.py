@@ -82,7 +82,7 @@ def main(args):
 
     # use our dataset and defined transformations
     total_dataset = ModaNetDataset(
-        args.dataset_path, ANN_FILE_NAME, CLASSES, IMAGE_SIZE, get_train_transform()
+        args.dataset_path, ANN_FILE_NAME, CLASSES, IMAGE_SIZE, args, get_train_transform()
     )
     print(len(total_dataset))
 

@@ -48,8 +48,8 @@ class Solver(object):
                 for param in self.net.parameters():
                     param.requires_grad = True
                 params = [p for p in self.net.parameters()]
-            for n,p in self.net.named_parameters():
-                print(n, p.requires_grad)
+            # for n,p in self.net.named_parameters():
+            #     print(n, p.requires_grad)
             if self.args.opt == "SGD":
                 self.optimizer = optim.SGD(params, lr=self.args.lr)
             elif self.args.opt == "Adam":
@@ -99,7 +99,7 @@ class Solver(object):
             }
             if self.args.cls_accessory:
                 loss_dict_tb["loss_accessory"]=0
-                
+
             for i, data in enumerate(prog_bar):
                 self.optimizer.zero_grad()
                 images, targets = data
