@@ -95,8 +95,11 @@ class Solver(object):
                 "loss_box_reg": 0,
                 "loss_mask": 0,
                 "loss_objectness": 0,
-                "loss_rpn_box_reg": 0
+                "loss_rpn_box_reg": 0,
             }
+            if self.args.cls_accessory:
+                loss_dict_tb["loss_accessory"]=0
+                
             for i, data in enumerate(prog_bar):
                 self.optimizer.zero_grad()
                 images, targets = data
@@ -104,6 +107,7 @@ class Solver(object):
                 targets = [{k: v.to(self.device) for k, v in t.items()} for t in targets]
 
                 loss_dict = self.net(images, targets) # when given images and targets as input it will return the loss
+                print(loss_dict)
                 losses = sum(loss for loss in loss_dict.values())
                 loss_value = losses.item()
                 train_loss_list.append(loss_value)
@@ -211,14 +215,19 @@ class Solver(object):
             i+=1
             
     def evaluate(self):
-        self.net.eval()
-        metric = MeanAveragePrecision(iou_type="bbox")
-        for data in self.test_loader:
-            images, targets = data
-            images = list(image.to(self.device) for image in images)
-            targets = [{k: v.to(self.device) for k, v in t.items()} for t in targets]
-            prediction = self.net(images)
-            metric.update(prediction, targets)
-            print(metric.compute())
-        result = metric.compute()
-        print(result)
+        # self.net.eval()
+        # metric = MeanAveragePrecision(iou_type="bbox")
+        # for data in self.test_loader:
+        #     images, targets = data
+        #     images = list(image.to(self.device) for image in images)
+        #     targets = [{k: v.to(self.device) for k, v in t.items()} for t in targets]
+        #     prediction = self.net(images)
+        #     metric.update(prediction, targets)
+        #     print(metric.compute())
+        # result = metric.compute()
+        with open(self.args.checkpoint_path + "/evaluate.txt", "w") as evaluate_file:
+            print(self.model_name, file=evaluate_file)
+            print("2", file=evaluate_file)
+
+    def debug(self):
+        print("Debug")
