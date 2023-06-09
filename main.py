@@ -61,6 +61,8 @@ def get_args():
 
     parser.add_argument('--random_seed', type=bool, default=True, help='Use same random seed to get same train/valid/test sets for every training.')
 
+    parser.add_argument('--coco_evaluation', type=bool, default=False, help='Use evaluate function from coco_eval. Default uses Mean Average Precision from torchvision')
+
     return parser.parse_args()
 
 def main(args):

@@ -195,13 +195,9 @@ class Solver(object):
                 break
             images, targets = data
             self.net.eval()
-            #test_img = images[0].to(self.device)
-            #prediction = self.net(test_img)
             prediction = self.net([images[0]])
             test_img = images[0].to(self.device)
             prediction = self.net([test_img])
-            #print(prediction[0])
-            #print(targets[0], flush=True)
             results = predicted_bbox(images[0],prediction,self.classes)
             results += predicted_mask(images[0],prediction)
             concatenation = np.concatenate((results[0],results[1],results[2]), axis=1)
@@ -212,34 +208,41 @@ class Solver(object):
             
     def evaluate(self, epoch):
         self.net.eval()
-        evaluate(self.net, self.test_loader, device=self.device)
-        # metric_bbox = MeanAveragePrecision(iou_type="bbox")
-        # metric_mask = MeanAveragePrecision(iou_type="segm")
-        # with torch.no_grad():
-        #   for data in tqdm(self.valid_loader):
-        #     images, targets = data
-        #     images = list(image.to(self.device) for image in images)
-        #     targets = [{k: v.to(self.device) for k, v in t.items()} for t in targets]
-        #     prediction = self.net(images)
-        #     metric_bbox.update(prediction, targets)
-        #     for pred in prediction:
-        #         pred['masks']=pred['masks'].squeeze()
-        #         pred['masks'] = pred['masks']>0.5
-        #     metric_mask.update(prediction, targets)
-        #     result_bbox = metric_bbox.compute()
-        #     result_mask = metric_mask.compute()
-        # if self.args.mode == "train":
-        #     self.writer.add_scalar('accuracy bbox',
-        #                     result_bbox.map.item(),epoch)
-        #     self.writer.add_scalar('accuracy mask',
-        #                     result_mask.map.item(),epoch)
-        # file_path = self.args.checkpoint_path + self.model_name + '_evaluate.txt'  # Specify the path to your file
-        # file = open(file_path, 'a')
+        with torch.no_grad():
+            if self.args.coco_evaluation:
+                evaluate(self.net, self.test_loader, device=self.device)
+            else:
+                i = 0
+                metric_bbox = MeanAveragePrecision(iou_type="bbox")
+                metric_mask = MeanAveragePrecision(iou_type="segm")
+                for data in tqdm(self.valid_loader):
+                    i+=1
+                    images, targets = data
+                    images = list(image.to(self.device) for image in images)
+                    targets = [{k: v.to(self.device) for k, v in t.items()} for t in targets]
+                    prediction = self.net(images)
+                    metric_bbox.update(prediction, targets)
+                    for pred in prediction:
+                        pred['masks']=pred['masks'].squeeze()
+                        pred['masks'] = pred['masks']>0.5
+                    metric_mask.update(prediction, targets)
+                    if i%50==0:
+                        result_bbox = metric_bbox.compute()
+                        result_mask = metric_mask.compute()
+                result_bbox = metric_bbox.compute()
+                result_mask = metric_mask.compute()
+                if self.args.mode == "train":
+                    self.writer.add_scalar('accuracy bbox',
+                                    result_bbox.map.item(),epoch)
+                    self.writer.add_scalar('accuracy mask',
+                                    result_mask.map.item(),epoch)
+                file_path = self.args.checkpoint_path + self.model_name + '_evaluate.txt'  # Specify the path to your file
+                file = open(file_path, 'a')
 
-        # # Write content to the file
-        # file.write('result_mask MAP: ',result_mask.map.item())
-        # file.write('result_bbox MAP: ',result_bbox.map.item())
-        # self.net.train()
+                # Write content to the file
+                file.write('result_mask MAP: ',result_mask.map.item())
+                file.write('result_bbox MAP: ',result_bbox.map.item())
+        self.net.train()
     
 
     def debug(self):
