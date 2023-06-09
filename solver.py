@@ -14,6 +14,7 @@ import cv2, random, numpy as np
 from utils.pytorchtools import EarlyStopping
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 from torch.utils.tensorboard import SummaryWriter
+from utils.engine import evaluate
 
 class Solver(object):
     """Solver for training and testing."""
@@ -139,7 +140,7 @@ class Solver(object):
                     if self.args.cls_accessory:
                         loss_dict_tb["loss_accessory"]=0
             val_loss_list = self.validate()
-            self.evaluate(epoch)
+            #self.evaluate(epoch)
             print(f"Epoch #{epoch+1} train loss: {sum(train_loss_list)/len(self.train_loader):.3f}", flush=True)   
             print(f"Epoch #{epoch+1} validation loss: {sum(val_loss_list)/len(self.valid_loader):.3f}", flush=True)  
 
@@ -211,33 +212,35 @@ class Solver(object):
             
     def evaluate(self, epoch):
         self.net.eval()
-        metric_bbox = MeanAveragePrecision(iou_type="bbox")
-        metric_mask = MeanAveragePrecision(iou_type="segm")
         with torch.no_grad():
-          for data in tqdm(self.valid_loader):
-              images, targets = data
-              images = list(image.to(self.device) for image in images)
-              targets = [{k: v.to(self.device) for k, v in t.items()} for t in targets]
-              prediction = self.net(images)
-              metric_bbox.update(prediction, targets)
-              for pred in prediction:
-                  pred['masks']=pred['masks'].squeeze()
-                  pred['masks'] = pred['masks']>0.5
-              metric_mask.update(prediction, targets)
-          result_bbox = metric_bbox.compute()
-          result_mask = metric_mask.compute()
-        if self.args.mode == "train":
-            self.writer.add_scalar('accuracy bbox',
-                            result_bbox.map.item(),epoch)
-            self.writer.add_scalar('accuracy mask',
-                            result_mask.map.item(),epoch)
-        file_path = self.args.checkpoint_path + self.model_name + '_evaluate.txt'  # Specify the path to your file
-        file = open(file_path, 'a')
+            evaluate(self.net, self.test_loader, device=self.device)
+        # metric_bbox = MeanAveragePrecision(iou_type="bbox")
+        # metric_mask = MeanAveragePrecision(iou_type="segm")
+        # with torch.no_grad():
+        #   for data in tqdm(self.valid_loader):
+        #     images, targets = data
+        #     images = list(image.to(self.device) for image in images)
+        #     targets = [{k: v.to(self.device) for k, v in t.items()} for t in targets]
+        #     prediction = self.net(images)
+        #     metric_bbox.update(prediction, targets)
+        #     for pred in prediction:
+        #         pred['masks']=pred['masks'].squeeze()
+        #         pred['masks'] = pred['masks']>0.5
+        #     metric_mask.update(prediction, targets)
+        #     result_bbox = metric_bbox.compute()
+        #     result_mask = metric_mask.compute()
+        # if self.args.mode == "train":
+        #     self.writer.add_scalar('accuracy bbox',
+        #                     result_bbox.map.item(),epoch)
+        #     self.writer.add_scalar('accuracy mask',
+        #                     result_mask.map.item(),epoch)
+        # file_path = self.args.checkpoint_path + self.model_name + '_evaluate.txt'  # Specify the path to your file
+        # file = open(file_path, 'a')
 
-        # Write content to the file
-        file.write('result_mask MAP: ',result_mask.map.item())
-        file.write('result_bbox MAP: ',result_bbox.map.item())
-        self.net.train()
+        # # Write content to the file
+        # file.write('result_mask MAP: ',result_mask.map.item())
+        # file.write('result_bbox MAP: ',result_bbox.map.item())
+        # self.net.train()
     
 
     def debug(self):
