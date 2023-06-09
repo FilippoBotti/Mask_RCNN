@@ -57,7 +57,9 @@ def get_args():
 
     parser.add_argument('--version', type=str, default='V1', choices=['V1', 'V2'], help = 'maskrcnn version (V1 or improved V2)')
 
-    parser.add_argument('--cls_accessory', action='store_true', help='Add a binary classifier for the accossories')
+    parser.add_argument('--cls_accessory', action='store_true', help='Add a binary classifier for the accessories')
+
+    parser.add_argument('--random_seed', type=bool, default=True, help='Use same random seed to get same train/valid/test sets for every training.')
 
     return parser.parse_args()
 
@@ -87,11 +89,12 @@ def main(args):
     print(len(total_dataset))
 
     # split the dataset in train and test set
-    torch.manual_seed(1)
+    if args.random_seed:
+        torch.manual_seed(1)
     indices = torch.randperm(len(total_dataset)).tolist()
     dataset = torch.utils.data.Subset(total_dataset, indices[:-9372])
     dataset_valid = torch.utils.data.Subset(total_dataset, indices[-9372:-4686])
-    dataset_test = torch.utils.data.Subset(total_dataset, indices[-4686:-4685])
+    dataset_test = torch.utils.data.Subset(total_dataset, indices[-4686:])
 
     # define training and validation data loaders
     data_loader = DataLoader(
@@ -137,3 +140,4 @@ if __name__ == "__main__":
     print(args)
     #print(list_files(args.checkpoint_path))
     main(args)
+
