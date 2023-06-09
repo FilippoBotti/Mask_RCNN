@@ -28,7 +28,7 @@ def accessory_fastrcnn_loss(class_logits, box_regression, accessory_prediction, 
     regression_targets = torch.cat(regression_targets, dim=0)
 
     classification_loss = F.cross_entropy(class_logits, labels)
-    accessory_loss = F.binary_cross_entropy(accessory_prediction, accessories.unsqueeze(1))
+    accessory_loss = F.binary_cross_entropy(accessory_prediction, accessories)
     # get indices that correspond to the regression targets for
     # the corresponding ground truth labels, to be used with
     # advanced indexing
