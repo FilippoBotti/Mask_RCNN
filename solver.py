@@ -118,6 +118,7 @@ class Solver(object):
                     loss_dict_tb[loss] += loss_dict[loss].item()
 
                 del losses, loss_dict, loss_value
+                self.save_model(0)
                 if i % self.args.print_every == self.args.print_every - 1:  
                     print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / self.args.print_every:.3f}')
 
@@ -188,7 +189,7 @@ class Solver(object):
         self.net.train()
         return val_loss_list
     
-    def test(self, img_count=5):
+    def test(self, img_count=1):
         print("Testing", flush=True)
         i = 0
         for data in self.test_loader:
@@ -201,14 +202,14 @@ class Solver(object):
             prediction = self.net([images[0]])
             test_img = images[0].to(self.device)
             prediction = self.net([test_img])
-            print(prediction)
-            print(targets[0]['labels'], flush=True)
+            #print(prediction[0])
+            #print(targets[0], flush=True)
             results = predicted_bbox(images[0],prediction,self.classes)
             results += predicted_mask(images[0],prediction)
             concatenation = np.concatenate((results[0],results[1],results[2]), axis=1)
             # image_name = str(epoch) + "_" + str(i) + "_image"
             # self.writer.add_image(image_name, concatenation)
-            show(results)
+            #show(results)
             i+=1
             
     def evaluate(self):

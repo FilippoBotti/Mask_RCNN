@@ -53,9 +53,8 @@ class ModaNetDataset(torch.utils.data.Dataset):
         boxes = []
         labels = []
         mask = []
+        accessories = []
         img = img.resize((self.width, self.height))
-        if self.args .cls_accessory:
-            is_accessory = 0
         for ann in img_anns:
             current_mask = self.annotations.annToMask(ann)
             current_mask= (current_mask > 0).astype(np.uint8)
@@ -71,13 +70,16 @@ class ModaNetDataset(torch.utils.data.Dataset):
             ymax_final = (ymax/image_height)*self.height
             boxes.append([xmin_final, ymin_final, xmax_final, ymax_final])
             labels.append(ann['category_id'])
-            if self.args .cls_accessory:
+            if self.args.cls_accessory:
                 if ann['category_id'] in ACCESSORIES_ID_LIST:
                     # accessorio presente
-                    is_accessory = 1
+                    accessories.append(1)
+                else:
+                    accessories.append(0)
 
         mask = np.array(mask)
         mask = torch.as_tensor(mask,  dtype=torch.uint8)
+        accessories = torch.as_tensor(accessories,  dtype=torch.float32)
         boxes = torch.as_tensor(boxes, dtype=torch.float32)
         # area of the bounding boxes
         area = (boxes[:, 3] - boxes[:, 1]) * (boxes[:, 2] - boxes[:, 0])
@@ -94,8 +96,8 @@ class ModaNetDataset(torch.utils.data.Dataset):
         target["image_id"] = image_id
         target["area"] = area
         target["iscrowd"] = iscrowd
-        if self.args .cls_accessory:
-            target["isaccessory"]=torch.tensor([is_accessory])
+        if self.args.cls_accessory:
+            target["accessories"] = accessories
 
         if self.transforms is not None:
             img, target = self.transforms(img, target)
