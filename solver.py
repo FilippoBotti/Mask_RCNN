@@ -14,8 +14,6 @@ import cv2, random, numpy as np
 from utils.pytorchtools import EarlyStopping
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 from torch.utils.tensorboard import SummaryWriter
-import pycocotools.mask as mask_utils
-from utils.engine import evaluate
 
 class Solver(object):
     """Solver for training and testing."""
