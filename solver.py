@@ -140,7 +140,7 @@ class Solver(object):
                     if self.args.cls_accessory:
                         loss_dict_tb["loss_accessory"]=0
             val_loss_list = self.validate()
-            #self.evaluate(epoch)
+            
             print(f"Epoch #{epoch+1} train loss: {sum(train_loss_list)/len(self.train_loader):.3f}", flush=True)   
             print(f"Epoch #{epoch+1} validation loss: {sum(val_loss_list)/len(self.valid_loader):.3f}", flush=True)  
 
@@ -159,7 +159,7 @@ class Solver(object):
                 print("Early stopping", flush=True)
                 break
         
-            
+        self.evaluate(epoch)   
         self.writer.flush()
         self.writer.close()
         print('Finished Training', flush=True)  
@@ -212,8 +212,7 @@ class Solver(object):
             
     def evaluate(self, epoch):
         self.net.eval()
-        with torch.no_grad():
-            evaluate(self.net, self.test_loader, device=self.device)
+        evaluate(self.net, self.test_loader, device=self.device)
         # metric_bbox = MeanAveragePrecision(iou_type="bbox")
         # metric_mask = MeanAveragePrecision(iou_type="segm")
         # with torch.no_grad():
