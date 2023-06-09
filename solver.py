@@ -232,7 +232,7 @@ class Solver(object):
                             result_bbox.map.item(),epoch)
             self.writer.add_scalar('accuracy mask',
                             result_mask.map.item(),epoch)
-        file_path = self.args.checkpoint_path + 'evaluate.txt'  # Specify the path to your file
+        file_path = self.args.checkpoint_path + self.model_name + '_evaluate.txt'  # Specify the path to your file
         file = open(file_path, 'a')
 
         # Write content to the file
