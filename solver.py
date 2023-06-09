@@ -213,20 +213,18 @@ class Solver(object):
         self.net.eval()
         metric_bbox = MeanAveragePrecision(iou_type="bbox")
         metric_mask = MeanAveragePrecision(iou_type="segm")
-        for data in self.valid_loader:
+        for data in tqdm(self.valid_loader):
             images, targets = data
             images = list(image.to(self.device) for image in images)
             targets = [{k: v.to(self.device) for k, v in t.items()} for t in targets]
             prediction = self.net(images)
             metric_bbox.update(prediction, targets)
-            result_bbox = metric_bbox.compute()
             for pred in prediction:
                 pred['masks']=pred['masks'].squeeze()
                 pred['masks'] = pred['masks']>0.5
             metric_mask.update(prediction, targets)
-            result_mask = metric_mask.compute()
-            print(result_bbox.map.item(),epoch)
-            print(result_mask.map.item(),epoch)
+        result_bbox = metric_bbox.compute()
+        result_mask = metric_mask.compute()
         if self.args.mode == "train":
             self.writer.add_scalar('accuracy bbox',
                             result_bbox.map.item(),epoch)
