@@ -102,7 +102,6 @@ class Solver(object):
                 targets = [{k: v.to(self.device) for k, v in t.items()} for t in targets]
 
                 loss_dict = self.net(images, targets) # when given images and targets as input it will return the loss
-                print(loss_dict)
                 losses = sum(loss for loss in loss_dict.values())
                 loss_value = losses.item()
                 train_loss_list.append(loss_value)
