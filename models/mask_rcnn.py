@@ -1,19 +1,12 @@
 import torchvision
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
-from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor, MaskRCNN_ResNet50_FPN_Weights
+from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 import torch.nn as nn
-import torch
-from torchvision.models.detection import roi_heads
-import torch
 import torchvision
 import torch.nn as nn
 import torch.nn.functional as F
-from collections import OrderedDict
-from typing import Union
 import torch
 from torch import nn
-import warnings
-from torch.jit.annotations import Tuple, List, Dict, Optional
 
 from models.roi_heads import CustomRoIHeads
 
@@ -38,7 +31,7 @@ class FastRCNNPredictorWithAccessory(nn.Module):
         super().__init__()
         self.cls_score = nn.Linear(in_channels, num_classes)
         self.bbox_pred = nn.Linear(in_channels, num_classes * 4)
-        self.cls_accessory = nn.Linear(in_channels,1)
+        self.accessory_score = nn.Linear(in_channels,1)
 
     def forward(self, x):
         if x.dim() == 4:
@@ -46,7 +39,7 @@ class FastRCNNPredictorWithAccessory(nn.Module):
         x = x.flatten(start_dim=1)
         scores = self.cls_score(x)
         bbox_deltas = self.bbox_pred(x)
-        accessory = self.cls_accessory(x)
+        accessory = self.accessory_score(x)
         accessory = F.softmax(accessory,-1)
         return scores, bbox_deltas, accessory
 
@@ -54,7 +47,6 @@ class FastRCNNPredictorWithAccessory(nn.Module):
 
 class Mask_RCNN(nn.Module):
     def __init__(self, num_classes, args, hidden_layer=256):
-       
         super(Mask_RCNN, self).__init__()
         self.args = args
         if args.pretrained:
@@ -65,12 +57,13 @@ class Mask_RCNN(nn.Module):
                 self.model = torchvision.models.detection.maskrcnn_resnet50_fpn_v2(weights=True)
                 print("Loaded pretrained weights V2", flush=True)
         else:
-            self.model = torchvision.models.detection.maskrcnn_resnet50_fpn()
+            if args.version == "V1":
+                self.model = torchvision.models.detection.maskrcnn_resnet50_fpn()
+            if args.version == "V2":
+                self.model = torchvision.models.detection.maskrcnn_resnet50_fpn_v2()
+
         self.in_features = self.model.roi_heads.box_predictor.cls_score.in_features
         self.in_features_mask = self.model.roi_heads.mask_predictor.conv5_mask.in_channels
-
-        self.training = args.mode == "training"
-        
 
         if args.cls_accessory:
             self.model.roi_heads.box_predictor = FastRCNNPredictorWithAccessory(self.in_features, num_classes)
@@ -81,7 +74,6 @@ class Mask_RCNN(nn.Module):
                                                         num_classes)
         if self.args.cls_accessory:
             r = self.model.roi_heads
-    # Initiate the custom roi_heads (see https://github.com/pytorch/vision/blob/main/torchvision/models/detection/roi_heads.py#L492)
             new_roi_heads = CustomRoIHeads(r.box_roi_pool, r.box_head, r.box_predictor, 
                 r.proposal_matcher.high_threshold, r.proposal_matcher.low_threshold, 
                 r.fg_bg_sampler.batch_size_per_image, r.fg_bg_sampler.positive_fraction,

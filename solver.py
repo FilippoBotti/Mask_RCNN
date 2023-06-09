@@ -240,8 +240,8 @@ class Solver(object):
                 file = open(file_path, 'a')
 
                 # Write content to the file
-                file.write('result_mask MAP: ',result_mask.map.item())
-                file.write('result_bbox MAP: ',result_bbox.map.item())
+                file.write('result_mask MAP: ',result_mask)
+                file.write('result_bbox MAP: ',result_bbox)
         self.net.train()
     
 
