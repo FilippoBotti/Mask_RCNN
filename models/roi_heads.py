@@ -147,10 +147,11 @@ class CustomRoIHeads(torchvision.models.detection.roi_heads.RoIHeads):
         pred_boxes = self.box_coder.decode(box_regression, proposals)
 
         pred_scores = F.softmax(class_logits, -1)
-
+        pred_accessories = F.softmax(accessories,-1)
+        
         pred_boxes_list = pred_boxes.split(boxes_per_image, 0)
         pred_scores_list = pred_scores.split(boxes_per_image, 0)
-        accessories_list = accessories.split(boxes_per_image, 0)
+        accessories_list = pred_accessories.split(boxes_per_image, 0)
 
         all_boxes = []
         all_scores = []
