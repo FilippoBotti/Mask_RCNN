@@ -14,7 +14,8 @@ import cv2, random, numpy as np
 from utils.pytorchtools import EarlyStopping
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 from torch.utils.tensorboard import SummaryWriter
-
+import pycocotools.mask as mask_utils
+from utils.engine import evaluate
 
 class Solver(object):
     """Solver for training and testing."""
@@ -142,7 +143,7 @@ class Solver(object):
                     if self.args.cls_accessory:
                         loss_dict_tb["loss_accessory"]=0
             val_loss_list = self.validate()
-
+            self.evaluate(epoch)
             print(f"Epoch #{epoch+1} train loss: {sum(train_loss_list)/len(self.train_loader):.3f}", flush=True)   
             print(f"Epoch #{epoch+1} validation loss: {sum(val_loss_list)/len(self.valid_loader):.3f}", flush=True)  
 
@@ -212,20 +213,30 @@ class Solver(object):
             #show(results)
             i+=1
             
-    def evaluate(self):
-        # self.net.eval()
-        # metric = MeanAveragePrecision(iou_type="bbox")
-        # for data in self.test_loader:
-        #     images, targets = data
-        #     images = list(image.to(self.device) for image in images)
-        #     targets = [{k: v.to(self.device) for k, v in t.items()} for t in targets]
-        #     prediction = self.net(images)
-        #     metric.update(prediction, targets)
-        #     print(metric.compute())
-        # result = metric.compute()
-        with open(self.args.checkpoint_path + "/evaluate.txt", "w") as evaluate_file:
-            print(self.model_name, file=evaluate_file)
-            print("2", file=evaluate_file)
+    def evaluate(self, epoch):
+        self.net.eval()
+        metric_bbox = MeanAveragePrecision(iou_type="bbox")
+        metric_mask = MeanAveragePrecision(iou_type="segm")
+        for data in self.valid_loader:
+            images, targets = data
+            images = list(image.to(self.device) for image in images)
+            targets = [{k: v.to(self.device) for k, v in t.items()} for t in targets]
+            prediction = self.net(images)
+            metric_bbox.update(prediction, targets)
+            result_bbox = metric_bbox.compute()
+            for pred in prediction:
+                pred['masks']=pred['masks'].squeeze()
+                pred['masks'] = pred['masks']>0.5
+            metric_mask.update(prediction, targets)
+            result_mask = metric_mask.compute()
+            print(result_bbox.map.item(),epoch)
+            print(result_mask.map.item(),epoch)
+        self.writer.add_scalar('accuracy bbox',
+                        result_bbox.map.item(),epoch)
+        self.writer.add_scalar('accuracy mask',
+                        result_mask.map.item(),epoch)
+        self.net.train()
+    
 
     def debug(self):
         print("Debug")

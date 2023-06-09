@@ -91,7 +91,7 @@ def main(args):
     indices = torch.randperm(len(total_dataset)).tolist()
     dataset = torch.utils.data.Subset(total_dataset, indices[:-9372])
     dataset_valid = torch.utils.data.Subset(total_dataset, indices[-9372:-4686])
-    dataset_test = torch.utils.data.Subset(total_dataset, indices[-4686:])
+    dataset_test = torch.utils.data.Subset(total_dataset, indices[-4686:-4685])
 
     # define training and validation data loaders
     data_loader = DataLoader(
@@ -126,7 +126,7 @@ def main(args):
     elif args.mode == "test":
         solver.test()
     elif args.mode == "evaluate":
-        solver.evaluate()
+        solver.evaluate(0)
     elif args.mode == "debug":
         solver.debug()
     else:
