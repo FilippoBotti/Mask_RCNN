@@ -227,10 +227,17 @@ class Solver(object):
             result_mask = metric_mask.compute()
             print(result_bbox.map.item(),epoch)
             print(result_mask.map.item(),epoch)
-        self.writer.add_scalar('accuracy bbox',
-                        result_bbox.map.item(),epoch)
-        self.writer.add_scalar('accuracy mask',
-                        result_mask.map.item(),epoch)
+        if self.args.mode == "train":
+            self.writer.add_scalar('accuracy bbox',
+                            result_bbox.map.item(),epoch)
+            self.writer.add_scalar('accuracy mask',
+                            result_mask.map.item(),epoch)
+        file_path = self.args.checkpoint_path + 'evaluate.txt'  # Specify the path to your file
+        file = open(file_path, 'a')
+
+        # Write content to the file
+        file.write('result_mask MAP: ',result_mask.map.item())
+        file.write('result_bbox MAP: ',result_bbox.map.item())
         self.net.train()
     
 
