@@ -44,12 +44,12 @@ Here is the structure of the project:
 - `models/roi_heads.py`: This module implements a custom RoIHeads for accessory binary classification and a custom fasterrcnn loss with accessories classification 
 - `dataset/modanet.py`: This module implements the DataLoader for Modanet dataset. It uses coco annotations.
 - `utils/utils.py`: This module contains utils functions, like drawing masks and boxes to an image.
-- `test_rt.py`: Work in progress module which will be in charge of use webcam and do model's inference on the image captured by the cam.
+- `test_rt.py`: *Work in progress* module which will be in charge of use webcam and do model's inference on the image captured by the cam.
 
 
 ## Getting Started
 
-All of the modules needed to run the models are in the `requirements.txt` file. I also provide `requirments_used.txt` which specify also the version of the package, just in case some of you want to replicate my environment.
+All of the modules needed to run the models are in the `requirements.txt` file. I also provide `requirments_used.txt` which specifies also the version of the package, just in case some of you want to replicate my environment.
 
 ```shell
 pip install requirments.txt
@@ -65,7 +65,7 @@ By the way I was in trouble with that instructions so here's another [usefull li
 
 
 ## Train from scratch
-To see a list of possible args see below.
+To see a list of possible args see the corresponding section below.
 ```shell
 python main.py --mode train --model_name modanet_training --dataset_path DATASET_PATH --checkpoint_path CHECKPOINT_PATH --epochs 40 --pretrained False --manual_seed False
 ```
@@ -85,27 +85,7 @@ python main.py --mode test --model_name modanet --dataset_path DATASET_PATH --ch
 ```shell
 python main.py --mode evaluate --model_name modanet --dataset_path DATASET_PATH --checkpoint_path CHECKPOINT_PATH 
 ```
-    parser.add_argument('--epochs', type=int, default=10, help='number of epochs')
-    parser.add_argument('--batch_size', type=int, default=16, help='number of elements in batch size')
-    parser.add_argument('--workers', type=int, default=4, help='number of workers in data loader')
-    parser.add_argument('--print_every', type=int, default=500, help='print losses every N iteration')
-
-    parser.add_argument('--lr', type=float, default=1e-5, help='learning rate')
-    parser.add_argument('--opt', type=str, default='Adam', choices=['SGD', 'Adam'], help = 'optimizer used for training')
-
-    parser.add_argument('--dataset_path', type=str, default='./ModaNetDatasets', help='path were to save/get the dataset')
-    parser.add_argument('--checkpoint_path', type=str, default='./', help='path were to save the trained model')
-
-    parser.add_argument('--', action='store_true', help='load the model from checkpoint before training')
-    parser.add_argument('--mode', type=str, default='train', choices=['train', 'test', 'evaluate', 'debug'], help = 'net mode (train or test)')
-    parser.add_argument('--pretrained', type=bool, default=False, help='load pretrained coco weights.')
-    parser.add_argument('--version', type=str, default='V1', choices=['V1', 'V2'], help = 'maskrcnn version (V1 or improved V2)')
-    parser.add_argument('--cls_accessory', action='store_true', help='Add a binary classifier for the accessories')
-
-    parser.add_argument('--manual_seed', type=bool, default=True, help='Use same random seed to get same train/valid/test sets for every training.')
-
-    parser.add_argument('--coco_evaluation', type=bool, default=False, help='Use evaluate function from coco_eval. Default uses Mean Average Precision from torchvision')
-
+   
 ## Args
 | Parameter           | Description                                                                                                 |
 |---------------------|-------------------------------------------------------------------------------------------------------------|
@@ -136,9 +116,8 @@ python main.py --mode evaluate --model_name modanet --dataset_path DATASET_PATH 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
 
 ## Acknowledgments
-This code is based on \cite{@inproceedings{zheng/2018acmmm,
-  author       = {Shuai Zheng and Fan Yang and M. Hadi Kiapour and Robinson Piramuthu},
-  title        = {ModaNet: A Large-Scale Street Fashion Dataset with Polygon Annotations},
-  booktitle    = {ACM Multimedia},
-  year         = {2018},
-}}
+This code is based on \[Zheng et al., 2018](#zheng2018acmmm)
+
+## References
+
+- Zheng, S., Yang, F., Kiapour, M. H., & Piramuthu, R. (2018). [ModaNet: A Large-Scale Street Fashion Dataset with Polygon Annotations](#zheng2018acmmm). In ACM Multimedia.
