@@ -4,13 +4,10 @@ import torch.nn as nn
 import os
 import time
 from tqdm import tqdm
-import sys
 from models.mask_rcnn import Mask_RCNN
 from utils.utils import  visualize_mask, show, visualize_bbox, predicted_bbox, predicted_mask
 from torchvision.utils import draw_segmentation_masks, make_grid
-import matplotlib.pyplot as plt
-import torchvision
-import cv2, random, numpy as np
+import numpy as np
 from utils.pytorchtools import EarlyStopping
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 from torch.utils.tensorboard import SummaryWriter
@@ -56,7 +53,7 @@ class Solver(object):
                 self.optimizer = optim.Adam(params, lr=self.args.lr)
 
             self.epochs = self.args.epochs
-            self.writer = SummaryWriter(self.args.checkpoint_path + '/runs/' + self.args.run_name + self.args.opt)
+            self.writer = SummaryWriter(self.args.checkpoint_path + '/runs/' + self.args.model_name + self.args.opt)
 
     def save_model(self, epoch):
         # if you want to save the model

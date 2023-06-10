@@ -3,39 +3,17 @@
 from torch.utils.data import DataLoader
 import torch
 from datasets.modanet import ModaNetDataset
-from models.mask_rcnn import Mask_RCNN
 
-from utils.utils import get_train_transform,get_valid_transform, collate_fn
+from utils.utils import get_train_transform, collate_fn
 import argparse
 
 from solver import Solver
-import os
-
-def list_files(parent_dir):
-    file_map = {}  # Initialize an empty dictionary to store the file mappings
-    for child_dir in os.listdir(parent_dir):
-        child_path = os.path.join(parent_dir, child_dir)
-        if os.path.isdir(child_path):
-            files = os.listdir(child_path)
-            if len(files) > 0:
-                print("Files in", child_dir + ":")
-                for file in files:
-                    file_path = os.path.join(child_path, file)
-                    if file == ".DS_STORE":
-                        os.remove(file_path)
-                    else:
-                        print(file)
-                        file_map[child_dir] = file  # Add the mapping to the dictionary
-                print()
-    return file_map 
 
 
 def get_args():
     parser = argparse.ArgumentParser()   
 
-    parser.add_argument('--run_name', type=str, default="run_1", help='name of current run')
     parser.add_argument('--model_name', type=str, default="first_train", help='name of the model to be saved/loaded')
-
     parser.add_argument('--annotations_file', type=str, default="modanet2018_instances_train.json", help='name of the annotations file')
 
     parser.add_argument('--epochs', type=int, default=10, help='number of epochs')
@@ -47,16 +25,12 @@ def get_args():
     parser.add_argument('--opt', type=str, default='Adam', choices=['SGD', 'Adam'], help = 'optimizer used for training')
 
     parser.add_argument('--dataset_path', type=str, default='./ModaNetDatasets', help='path were to save/get the dataset')
-    parser.add_argument('--checkpoint_path', type=str, default='./', help='path were to save the trained model')
+    parser.add_argument('--checkpoint_path', type=str, default='./', help='path where to save the trained model')
 
     parser.add_argument('--resume_train', action='store_true', help='load the model from checkpoint before training')
-
     parser.add_argument('--mode', type=str, default='train', choices=['train', 'test', 'evaluate', 'debug'], help = 'net mode (train or test)')
-
     parser.add_argument('--pretrained', type=bool, default=False, help='load pretrained coco weights.')
-
     parser.add_argument('--version', type=str, default='V1', choices=['V1', 'V2'], help = 'maskrcnn version (V1 or improved V2)')
-
     parser.add_argument('--cls_accessory', action='store_true', help='Add a binary classifier for the accessories')
 
     parser.add_argument('--manual_seed', type=bool, default=True, help='Use same random seed to get same train/valid/test sets for every training.')
@@ -140,6 +114,5 @@ def main(args):
 if __name__ == "__main__":
     args = get_args()
     print(args)
-    #print(list_files(args.checkpoint_path))
     main(args)
 
