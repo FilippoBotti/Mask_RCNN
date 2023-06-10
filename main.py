@@ -59,7 +59,7 @@ def get_args():
 
     parser.add_argument('--cls_accessory', action='store_true', help='Add a binary classifier for the accessories')
 
-    parser.add_argument('--random_seed', type=bool, default=True, help='Use same random seed to get same train/valid/test sets for every training.')
+    parser.add_argument('--manual_seed', type=bool, default=True, help='Use same random seed to get same train/valid/test sets for every training.')
 
     parser.add_argument('--coco_evaluation', type=bool, default=False, help='Use evaluate function from coco_eval. Default uses Mean Average Precision from torchvision')
 
@@ -91,7 +91,7 @@ def main(args):
     print(len(total_dataset))
 
     # split the dataset in train and test set
-    if args.random_seed:
+    if args.manual_seed:
         torch.manual_seed(1)
     indices = torch.randperm(len(total_dataset)).tolist()
     dataset = torch.utils.data.Subset(total_dataset, indices[:-9372])

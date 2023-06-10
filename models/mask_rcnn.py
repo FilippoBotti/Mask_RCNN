@@ -40,7 +40,6 @@ class FastRCNNPredictorWithAccessory(nn.Module):
         scores = self.cls_score(x)
         bbox_deltas = self.bbox_pred(x)
         accessory = self.accessory_score(x)
-        accessory = F.softmax(accessory,-1)
         return scores, bbox_deltas, accessory
 
 

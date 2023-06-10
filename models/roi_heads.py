@@ -28,7 +28,9 @@ def accessory_fastrcnn_loss(class_logits, box_regression, accessory_prediction, 
     regression_targets = torch.cat(regression_targets, dim=0)
 
     classification_loss = F.cross_entropy(class_logits, labels)
-    accessory_loss = F.binary_cross_entropy(accessory_prediction, accessories.unsqueeze(1))
+
+    pred_accessories = F.sigmoid(accessory_prediction)
+    accessory_loss = F.binary_cross_entropy(pred_accessories, accessories.unsqueeze(1))
     # get indices that correspond to the regression targets for
     # the corresponding ground truth labels, to be used with
     # advanced indexing
@@ -148,9 +150,11 @@ class CustomRoIHeads(torchvision.models.detection.roi_heads.RoIHeads):
 
         pred_scores = F.softmax(class_logits, -1)
 
+        pred_accessories = F.sigmoid(accessories)
+
         pred_boxes_list = pred_boxes.split(boxes_per_image, 0)
         pred_scores_list = pred_scores.split(boxes_per_image, 0)
-        accessories_list = accessories.split(boxes_per_image, 0)
+        accessories_list = pred_accessories.split(boxes_per_image, 0)
 
         all_boxes = []
         all_scores = []
