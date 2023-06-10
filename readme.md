@@ -1,5 +1,3 @@
-A Mask R-CNN Pytorch implementation on Modanet dataset.
-
 # Instance Segmentation and Object Recognition on Modanet
 
 ![ModaNet](https://github.com/eBay/modanet/blob/master/logo/modanet_logo2.png)
