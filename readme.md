@@ -116,7 +116,7 @@ python main.py --mode evaluate --model_name modanet --dataset_path DATASET_PATH 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
 
 ## Acknowledgments
-This code is based on [@zheng/2018acmmm]
+This code is based on [Zheng et al., 2018](#zheng2018acmmm)
 
 ## References
 
