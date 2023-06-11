@@ -150,8 +150,7 @@ class CustomRoIHeads(torchvision.models.detection.roi_heads.RoIHeads):
 
         pred_scores = F.softmax(class_logits, -1)
 
-        pred_accessories = F.sigmoid(accessories)
-
+        pred_accessories = torch.sigmoid(accessories)
         pred_boxes_list = pred_boxes.split(boxes_per_image, 0)
         pred_scores_list = pred_scores.split(boxes_per_image, 0)
         accessories_list = pred_accessories.split(boxes_per_image, 0)
@@ -180,31 +179,33 @@ class CustomRoIHeads(torchvision.models.detection.roi_heads.RoIHeads):
             scores = scores.reshape(-1)
             labels = labels.reshape(-1)
             accessories_scores = accessories_scores.reshape(-1)
+
+
             # remove low scoring boxes
             inds = torch.where(scores > self.score_thresh)[0]
             boxes, scores, labels, accessories_scores = boxes[inds], scores[inds], labels[inds], accessories_scores[inds]
-            # accessory_inds = inds // num_classes  # Calculate indices for accessories
-            # accessories_scores = accessories_scores[accessory_inds]
+            
 
             # remove empty boxes
             keep = box_ops.remove_small_boxes(boxes, min_size=1e-2)
             boxes, scores, labels, accessories_scores = boxes[keep], scores[keep], labels[keep], accessories_scores[keep]
-            # accessory_keep = keep // num_classes  # Calculate indices for accessories
-            # accessories_scores = accessories_scores[accessory_keep] 
+            
 
             # non-maximum suppression, independently done per class
             keep = box_ops.batched_nms(boxes, scores, labels, self.nms_thresh)
             # keep only topk scoring predictions
             keep = keep[: self.detections_per_img]
             boxes, scores, labels, accessories_scores = boxes[keep], scores[keep], labels[keep], accessories_scores[keep]
-            # accessory_keep = keep // num_classes  # Calculate indices for accessories
-            # accessories_scores = accessories_scores[accessory_keep] 
+
+            inds = torch.where(accessories_scores < self.score_thresh)[0]
+            accessories_scores[inds] = 0
 
             all_boxes.append(boxes)
             all_scores.append(scores)
+
             all_labels.append(labels)
             all_accessories.append(accessories_scores)
-
+        
         return all_boxes, all_scores, all_labels, all_accessories
 
     
@@ -265,7 +266,7 @@ class CustomRoIHeads(torchvision.models.detection.roi_heads.RoIHeads):
                         "boxes": boxes[i],
                         "labels": labels[i],
                         "scores": scores[i],
-                        "accessory": accessories[i],
+                        "accessories": accessories[i],
                     }
                 )
 

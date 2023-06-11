@@ -5,7 +5,7 @@ import os
 import time
 from tqdm import tqdm
 from models.mask_rcnn import Mask_RCNN
-from utils.utils import  visualize_mask, show, visualize_bbox, predicted_bbox, predicted_mask
+from utils.utils import  visualize_mask, show, visualize_bbox, predicted_bbox, predicted_mask, predicted_accessories_and_labels
 from torchvision.utils import draw_segmentation_masks, make_grid
 import numpy as np
 from utils.pytorchtools import EarlyStopping
@@ -184,7 +184,7 @@ class Solver(object):
         self.net.train()
         return val_loss_list
     
-    def test(self, img_count=1):
+    def test(self, img_count=5):
         print("Testing", flush=True)
         i = 0
         for data in self.test_loader:
@@ -193,14 +193,14 @@ class Solver(object):
             images, targets = data
             self.net.eval()
             prediction = self.net([images[0]])
-            test_img = images[0].to(self.device)
-            prediction = self.net([test_img])
-            results = predicted_bbox(images[0],prediction,self.classes)
-            results += predicted_mask(images[0],prediction)
+            for element in predicted_accessories_and_labels([images[0]], prediction, targets, self.args.cls_accessory):
+                print(element)
+            results = visualize_bbox(images[0],prediction,targets[0],self.classes)
+            results += visualize_mask(images[0],prediction,targets[0])
             concatenation = np.concatenate((results[0],results[1],results[2]), axis=1)
             # image_name = str(epoch) + "_" + str(i) + "_image"
             # self.writer.add_image(image_name, concatenation)
-            #show(results)
+            show(results)
             i+=1
             
     def evaluate(self, epoch):
@@ -237,8 +237,10 @@ class Solver(object):
                 file = open(file_path, 'a')
 
                 # Write content to the file
-                file.write('result_mask MAP: ',result_mask)
-                file.write('result_bbox MAP: ',result_bbox)
+                file.write('result_mask MAP: ')
+                file.write(result_mask)
+                file.write('result_bbox MAP: ')
+                file.write(result_bbox)
         self.net.train()
     
 
