@@ -133,6 +133,7 @@ class CustomRoIHeads(torchvision.models.detection.roi_heads.RoIHeads):
         regression_targets = self.box_coder.encode(matched_gt_boxes, proposals)
         return proposals, matched_idxs, labels, accessories, regression_targets
     
+
     def postprocess_detections(
         self,
         class_logits,  # type: Tensor
@@ -197,7 +198,7 @@ class CustomRoIHeads(torchvision.models.detection.roi_heads.RoIHeads):
             keep = keep[: self.detections_per_img]
             boxes, scores, labels, accessories_scores = boxes[keep], scores[keep], labels[keep], accessories_scores[keep]
 
-            inds = torch.where(accessories_scores < self.score_thresh)[0]
+            inds = torch.where(accessories_scores < 0.5)[0]
             accessories_scores[inds] = 0
 
             all_boxes.append(boxes)

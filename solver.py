@@ -234,13 +234,13 @@ class Solver(object):
                     self.writer.add_scalar('accuracy mask',
                                     result_mask.map.item(),epoch)
                 file_path = self.args.checkpoint_path + self.model_name + '_evaluate.txt'  # Specify the path to your file
-                file = open(file_path, 'a')
 
                 # Write content to the file
-                file.write('result_mask MAP: ')
-                file.write(result_mask)
-                file.write('result_bbox MAP: ')
-                file.write(result_bbox)
+                print(self.model_name)
+                print('result_mask MAP: ')
+                print(result_mask)
+                print('result_bbox MAP: ')
+                print(result_bbox)
         self.net.train()
     
 
