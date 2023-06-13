@@ -82,7 +82,7 @@ class Mask_RCNN(nn.Module):
 
             self.model.roi_heads = new_roi_heads
 
-        self.model.roi_heads.score_thresh = 0.7
+        #self.model.roi_heads.score_thresh = 0.7
 
     def forward(self, images, targets=None):
         return self.model(images,targets)
