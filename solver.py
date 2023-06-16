@@ -210,8 +210,8 @@ class Solver(object):
                 evaluate(self.net, self.test_loader, device=self.device)
             else:
                 i = 0
-                metric_bbox = MeanAveragePrecision(iou_type="bbox")
-                metric_mask = MeanAveragePrecision(iou_type="segm")
+                metric_bbox = MeanAveragePrecision(iou_type="bbox", class_metrics=True)
+                metric_mask = MeanAveragePrecision(iou_type="segm", class_metrics=True)
                 for data in tqdm(self.valid_loader):
                     i+=1
                     images, targets = data

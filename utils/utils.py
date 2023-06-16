@@ -163,18 +163,18 @@ def visualize_bbox(image, prediction, target, classes):
         box=element.detach().cpu()
         scr=prediction[0]['scores'][index].detach().cpu()
         label = classes[prediction[0]['labels'][index].detach().cpu()]
-       # if scr>0.8:
-            #print(box)
-        cv2.rectangle(
-        bbox_img, 
-        (int(box[0]), int(box[1])), (int(box[2]), int(box[3])),
-        (0, 255, 0), 2
-    )
+        if scr>0.7:
+            print(box)
+            cv2.rectangle(
+            bbox_img, 
+            (int(box[0]), int(box[1])), (int(box[2]), int(box[3])),
+            (0, 255, 0), 2
+        )
 
-        cv2.putText(
-        bbox_img, label, (int(box[0]), int(box[1]-5)), 
-        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2
-    )
+            cv2.putText(
+            bbox_img, label, (int(box[0]), int(box[1]-5)), 
+            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2
+        )
     for box_num in range(len(target['boxes'])):
         box = target['boxes'][box_num]
         label = classes[target['labels'][box_num]]
@@ -202,8 +202,8 @@ def visualize_mask(image, prediction, target):
         msk=prediction[0]['masks'][index,0].detach().cpu()
         scr=prediction[0]['scores'][index].detach().cpu()
         label = prediction[0]['labels'][index].detach().cpu()
-        #if scr>0.8:
-        mask = draw_segmentation_masks(mask,msk>0.5,1, MASK_COLORS[label-1])
+        if scr>0.7:
+            mask = draw_segmentation_masks(mask,msk>0.5,1, MASK_COLORS[label-1])
     
     for i in range(len(target['masks'])):
         real_mask = draw_segmentation_masks(real_mask,target['masks'][i]>0,1, MASK_COLORS[target['labels'][i]-1])
