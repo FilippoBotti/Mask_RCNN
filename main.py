@@ -21,6 +21,8 @@ def get_args():
     parser.add_argument('--workers', type=int, default=4, help='number of workers in data loader')
     parser.add_argument('--print_every', type=int, default=500, help='print losses every N iteration')
 
+    parser.add_argument('--trainable_backbone_layers', type=int, default=-1, help='number of trainable (not frozen) layers starting from final block.')
+
     parser.add_argument('--lr', type=float, default=1e-5, help='learning rate')
     parser.add_argument('--opt', type=str, default='Adam', choices=['SGD', 'Adam'], help = 'optimizer used for training')
 

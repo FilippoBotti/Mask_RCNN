@@ -50,10 +50,16 @@ class Mask_RCNN(nn.Module):
         self.args = args
         if args.pretrained:
             if args.version == "V1":
-                self.model = torchvision.models.detection.maskrcnn_resnet50_fpn(weights=True)
+                if args.trainable_backbone_layers != -1:
+                    self.model = torchvision.models.detection.maskrcnn_resnet50_fpn(weights=True, trainable_backbone_layers= args.trainable_backbone_layers)
+                else:
+                    self.model = torchvision.models.detection.maskrcnn_resnet50_fpn(weights=True)
                 print("Loaded pretrained weights V1", flush=True)
             if args.version == "V2":
-                self.model = torchvision.models.detection.maskrcnn_resnet50_fpn_v2(weights=True)
+                if args.trainable_backbone_layers != -1:
+                    self.model = torchvision.models.detection.maskrcnn_resnet50_fpn_v2(weights=True, trainable_backbone_layers= args.trainable_backbone_layers)
+                else:
+                    self.model = torchvision.models.detection.maskrcnn_resnet50_fpn_v2(weights=True)
                 print("Loaded pretrained weights V2", flush=True)
         else:
             if args.version == "V1":
