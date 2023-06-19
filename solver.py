@@ -10,6 +10,7 @@ from torchvision.utils import draw_segmentation_masks, make_grid
 import numpy as np
 from utils.pytorchtools import EarlyStopping
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
+from torchmetrics.classification import BinaryAccuracy
 from torch.utils.tensorboard import SummaryWriter
 from utils.engine import evaluate
 
@@ -212,12 +213,35 @@ class Solver(object):
                 i = 0
                 metric_bbox = MeanAveragePrecision(iou_type="bbox", class_metrics=True)
                 metric_mask = MeanAveragePrecision(iou_type="segm", class_metrics=True)
+
+                if self.args.cls_accessory:
+                    metric_accessory = MeanAveragePrecision(class_metrics=True)
+
                 for data in tqdm(self.valid_loader):
                     i+=1
                     images, targets = data
                     images = list(image.to(self.device) for image in images)
                     targets = [{k: v.to(self.device) for k, v in t.items()} for t in targets]
                     prediction = self.net(images)
+
+                    if self.args.cls_accessory:
+                        accessory_pred_list = []
+                        accessory_target_list = []
+
+                        for pred in prediction:
+                            predicted_dict = dict(boxes = pred['boxes'],
+                            scores = pred['accessories'],
+                            labels = torch.round(pred['accessories'])
+                            )
+                            accessory_pred_list.append(predicted_dict)
+                            
+                        for tar in targets:
+                            target_dict = dict(boxes=tar['boxes'],
+                                labels = tar['accessories']
+                            )
+                            accessory_target_list.append(target_dict)
+                        metric_accessory.update(accessory_pred_list,accessory_target_list)
+
                     metric_bbox.update(prediction, targets)
                     for pred in prediction:
                         pred['masks']=pred['masks'].squeeze()
@@ -226,14 +250,13 @@ class Solver(object):
                     if i%50==0:
                         result_bbox = metric_bbox.compute()
                         result_mask = metric_mask.compute()
+                        if self.args.cls_accessory:
+                            result_accessory = metric_accessory.compute()
+
                 result_bbox = metric_bbox.compute()
                 result_mask = metric_mask.compute()
-                if self.args.mode == "train":
-                    self.writer.add_scalar('accuracy bbox',
-                                    result_bbox.map.item(),epoch)
-                    self.writer.add_scalar('accuracy mask',
-                                    result_mask.map.item(),epoch)
-                file_path = self.args.checkpoint_path + self.model_name + '_evaluate.txt'  # Specify the path to your file
+                if self.args.cls_accessory:
+                        result_accessory = metric_accessory.compute()
 
                 # Write content to the file
                 print(self.model_name)
@@ -241,6 +264,10 @@ class Solver(object):
                 print(result_mask)
                 print('result_bbox MAP: ')
                 print(result_bbox)
+                if self.args.cls_accessory:
+                    print('result_accessory AP: ')
+                    print(result_accessory)
+               
         self.net.train()
     
 
