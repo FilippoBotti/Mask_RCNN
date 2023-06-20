@@ -230,7 +230,7 @@ class Solver(object):
 
                         for pred in prediction:
                             predicted_dict = dict(boxes = pred['boxes'],
-                            scores = pred['accessories'],
+                            scores = pred['scores'],
                             labels = torch.round(pred['accessories'])
                             )
                             accessory_pred_list.append(predicted_dict)
