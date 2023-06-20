@@ -106,7 +106,7 @@ def main(args):
     if args.mode == "train":
         solver.train()
     elif args.mode == "test":
-        solver.test()
+        solver.test(img_count=50)
     elif args.mode == "evaluate":
         solver.evaluate(0)
     elif args.mode == "debug":

@@ -10,8 +10,6 @@ import matplotlib.pyplot as plt
 
 import torchvision.transforms.functional as F
 
-import matplotlib.pyplot as plt
-import numpy as np
 
 plt.rcParams["savefig.bbox"] = 'tight'
 
@@ -165,7 +163,7 @@ def visualize_bbox(image, prediction, target, classes):
         box=element.detach().cpu()
         scr=prediction[0]['scores'][index].detach().cpu()
         label = classes[prediction[0]['labels'][index].detach().cpu()]
-        if scr>0.7:
+        if scr>0.5:
             print(box)
             cv2.rectangle(
             bbox_img, 
@@ -204,7 +202,7 @@ def visualize_mask(image, prediction, target):
         msk=prediction[0]['masks'][index,0].detach().cpu()
         scr=prediction[0]['scores'][index].detach().cpu()
         label = prediction[0]['labels'][index].detach().cpu()
-        if scr>0.7:
+        if scr>0.5:
             mask = draw_segmentation_masks(mask,msk>0.5,1, MASK_COLORS[label-1])
     
     for i in range(len(target['masks'])):
@@ -240,27 +238,3 @@ def get_valid_transform():
     ])
 
 
-
-
-def plot_histogram(values, num_classes):
-    # Calculate the number of bins based on the number of classes and values per class
-    num_bins = num_classes * 3
-
-    # Generate random labels for the values
-    labels = np.random.randint(0, num_classes, len(values))
-
-    # Plot the histogram
-    plt.hist(values, bins=num_bins, alpha=0.7, edgecolor='black', label='Values')
-    plt.xlabel('Value')
-    plt.ylabel('Frequency')
-    plt.title('Histogram')
-    plt.legend()
-
-    # Add class labels to the plot
-    unique_labels = np.unique(labels)
-    class_centers = np.linspace(0, num_bins, num_classes + 1)[:-1] + 1.5
-    for label, x in zip(unique_labels, class_centers):
-        plt.text(x, plt.gca().get_ylim()[1] * 0.9, f'Class {label}', ha='center', va='center')
-
-    # Show the plot
-    plt.show()

@@ -33,11 +33,15 @@ def plot_results(data, title, labels):
     plt.show()
 
 data = [
-    {'map': (0.6341), 'map_50': (0.8309), 'map_75': (0.7368)},
+    { 'map': (0.5457), 'map_50': (0.7604), 'map_75': (0.6261), },
+    {'map': (0.5872), 'map_50': (0.7736), 'map_75': (0.6598),},
+
     {'map': (0.5461), 'map_50': (0.7622), 'map_75': (0.6204),},
-    #{'map': (0.5370), 'map_50': (0.7634), 'map_75': (0.6182),}
+    {'map': (0.6385), 'map_50': (0.8212), 'map_75': (0.7241),}
 ]
 
-title = 'ADAM BBox mAp'
-labels = ['batch 2','batch 16']
+#'map': (0.5457), 'map_50': (0.7604), 'map_75': (0.6261), 
+#
+title = 'BBox mAp'
+labels = ['v1_5layer','v2_5layer', 'v1_3layer', 'v2_3layer']
 plot_results(data,title,labels)
