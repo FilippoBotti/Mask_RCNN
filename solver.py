@@ -229,6 +229,7 @@ class Solver(object):
                         accessory_target_list = []
 
                         for pred in prediction:
+                            pred['accessories'] = torch.where(pred['accessories'] < 0.5, 1 - pred['accessories'], pred['accessories'])
                             predicted_dict = dict(boxes = pred['boxes'],
                             scores = pred['accessories'],
                             labels = torch.round(pred['accessories'])
