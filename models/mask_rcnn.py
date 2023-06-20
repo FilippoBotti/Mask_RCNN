@@ -90,7 +90,9 @@ class Mask_RCNN(nn.Module):
 
         #self.model.roi_heads.score_thresh = 0.5
         print(self.model.roi_heads.score_thresh)
-
+        if self.args.change_anchors:
+            self.model.rpn.anchor_generator.sizes = ((8,), (16,), (32,), (128,), (256,))
+        print(self.model.rpn.anchor_generator.sizes)
     def forward(self, images, targets=None):
         return self.model(images,targets)
     

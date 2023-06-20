@@ -34,6 +34,7 @@ def get_args():
     parser.add_argument('--pretrained', type=bool, default=False, help='load pretrained coco weights.')
     parser.add_argument('--version', type=str, default='V1', choices=['V1', 'V2'], help = 'maskrcnn version (V1 or improved V2)')
     parser.add_argument('--cls_accessory', action='store_true', help='Add a binary classifier for the accessories')
+    parser.add_argument('--change_anchors', action='store_true', help='Change anchors')
 
     parser.add_argument('--manual_seed', type=bool, default=True, help='Use same random seed to get same train/valid/test sets for every training.')
 

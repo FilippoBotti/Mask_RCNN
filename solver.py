@@ -194,8 +194,8 @@ class Solver(object):
             images, targets = data
             self.net.eval()
             prediction = self.net([images[0]])
-            for element in predicted_accessories_and_labels([images[0]], prediction, targets, self.args.cls_accessory):
-                print(element)
+            # for element in predicted_accessories_and_labels([images[0]], prediction, targets, self.args.cls_accessory):
+            #     print(element)
             results = visualize_bbox(images[0],prediction,targets[0],self.classes)
             results += visualize_mask(images[0],prediction,targets[0])
             concatenation = np.concatenate((results[0],results[1],results[2]), axis=1)
