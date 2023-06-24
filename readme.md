@@ -59,7 +59,7 @@ git clone https://github.com/FilippoBotti/Mask_RCNN.git
 
 ## Download dataset
 To download the datasets I suggest you to follow the [offical guide](https://github.com/eBay/modanet/tree/master).
-By the way I was in trouble with that instructions so here's another [usefull link](https://github.com/kyamagu/paperdoll/issues/11)
+By the way I was in trouble with that instructions so here's another [useful link](https://github.com/kyamagu/paperdoll/issues/11)
 
 
 ## Train from scratch
