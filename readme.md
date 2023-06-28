@@ -50,7 +50,7 @@ Here is the structure of the project:
 All of the modules needed to run the models are in the `requirements.txt` file. I also provide `requirments_used.txt` which specifies also the version of the package, just in case some of you want to replicate my environment.
 
 ```shell
-pip install requirments.txt
+pip install -r requirments.txt
 ```
 And then you can clone this repo
 ```shell
