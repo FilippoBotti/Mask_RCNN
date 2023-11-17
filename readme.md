@@ -50,7 +50,7 @@ Here is the structure of the project:
 All of the modules needed to run the models are in the `requirements.txt` file. I also provide `requirments_used.txt` which specifies also the version of the package, just in case some of you want to replicate my environment.
 
 ```shell
-pip install requirments.txt
+pip install -r requirments.txt
 ```
 And then you can clone this repo
 ```shell
@@ -59,7 +59,7 @@ git clone https://github.com/FilippoBotti/Mask_RCNN.git
 
 ## Download dataset
 To download the datasets I suggest you to follow the [offical guide](https://github.com/eBay/modanet/tree/master).
-By the way I was in trouble with that instructions so here's another [usefull link](https://github.com/kyamagu/paperdoll/issues/11)
+By the way I was in trouble with that instructions so here's another [useful link](https://github.com/kyamagu/paperdoll/issues/11)
 
 
 ## Train from scratch
