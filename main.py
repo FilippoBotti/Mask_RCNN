@@ -3,6 +3,7 @@
 from torch.utils.data import DataLoader
 import torch
 from datasets.modanet import ModaNetDataset
+from datasets.fashionpedia import FashionpediaDataset
 
 from utils.utils import get_train_transform, collate_fn
 import argparse
@@ -33,6 +34,7 @@ def get_args():
     parser.add_argument('--mode', type=str, default='train', choices=['train', 'test', 'evaluate', 'debug'], help = 'net mode (train or test)')
     parser.add_argument('--pretrained', type=bool, default=False, help='load pretrained coco weights.')
     parser.add_argument('--version', type=str, default='V1', choices=['V1', 'V2'], help = 'maskrcnn version (V1 or improved V2)')
+    parser.add_argument('--dataset', type=str, default='modanet', choices=['modanet', 'fashionpedia'], help = 'modanet or fashionpedia dataset')
     parser.add_argument('--cls_accessory', action='store_true', help='Add a binary classifier for the accessories')
     parser.add_argument('--change_anchors', action='store_true', help='Change anchors')
 
@@ -59,12 +61,25 @@ def main(args):
         '__background__', '1','2','3','4','5','6','7','8','9','10','11','12','13'
     ]
 
+    CLASSES_FASHIONPEDIA = [
+    '__background__', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10',
+    '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22',
+    '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34',
+    '35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46',
+    '47', '48', '49', '50', '51', '52', '53'
+    ]
+
     ANN_FILE_NAME = args.annotations_file
 
     # use our dataset and defined transformations
-    total_dataset = ModaNetDataset(
-        args.dataset_path, ANN_FILE_NAME, CLASSES, IMAGE_SIZE, args, get_train_transform()
-    )
+    if args.dataset == "modanet":
+        total_dataset = ModaNetDataset(
+            args.dataset_path, ANN_FILE_NAME, CLASSES, IMAGE_SIZE, args, get_train_transform()
+        )
+    elif args.dataset == "fashionpedia":
+        total_dataset = FashionpediaDataset(
+            args.dataset_path, ANN_FILE_NAME, CLASSES_FASHIONPEDIA, IMAGE_SIZE, args, get_train_transform()
+        )
     print(len(total_dataset))
 
     # split the dataset in train and test set
@@ -95,12 +110,20 @@ def main(args):
     print("Device: ", DEVICE)
 
     # define solver class
-    solver = Solver(train_loader=data_loader,
+    if args.dataset == "modanet":
+        solver = Solver(train_loader=data_loader,
             valid_loader=data_loader_valid,
             test_loader=data_loader_test,
             device=DEVICE,
             args=args,
             classes = CLASSES)
+    elif args.dataset == "fashionpedia":
+        solver = Solver(train_loader=data_loader,
+            valid_loader=data_loader_valid,
+            test_loader=data_loader_test,
+            device=DEVICE,
+            args=args,
+            classes = CLASSES_FASHIONPEDIA)
 
     # TRAIN model
     if args.mode == "train":

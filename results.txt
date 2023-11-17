@@ -1,0 +1,42 @@
+ADAM V1 FINETUNING 10 EPOCHE BATCH 16 NO ACCESSORI LR 1e-5
+result_mask MAP: 
+{'map': tensor(0.5163), 'map_50': tensor(0.7799), 'map_75': tensor(0.5745), 'map_small': tensor(0.1612), 'map_medium': tensor(0.4689), 'map_large': tensor(0.4868), 'mar_1': tensor(0.5846), 'mar_10': tensor(0.6401), 'mar_100': tensor(0.6408), 'mar_small': tensor(0.2953), 'mar_medium': tensor(0.6144), 'mar_large': tensor(0.5845), 'map_per_class': tensor(-1.), 'mar_100_per_class': tensor(-1.)}
+result_bbox MAP: 
+{'map': tensor(0.5472), 'map_50': tensor(0.7609), 'map_75': tensor(0.6245), 'map_small': tensor(0.1126), 'map_medium': tensor(0.4179), 'map_large': tensor(0.5051), 'mar_1': tensor(0.6157), 'mar_10': tensor(0.6765), 'mar_100': tensor(0.6774), 'mar_small': tensor(0.2106), 'mar_medium': tensor(0.5859), 'mar_large': tensor(0.6289), 'map_per_class': tensor(-1.), 'mar_100_per_class': tensor(-1.)}
+
+
+SGD V2 FINETUNING 10 EPOCHE BATCH 16 NO ACCESSORI LR 1e-3
+result_mask MAP: 
+{'map': tensor(0.4564), 'map_50': tensor(0.7145), 'map_75': tensor(0.5021), 'map_small': tensor(0.1498), 'map_medium': tensor(0.4114), 'map_large': tensor(0.4445), 'mar_1': tensor(0.5566), 'mar_10': tensor(0.6167), 'mar_100': tensor(0.6174), 'mar_small': tensor(0.2955), 'mar_medium': tensor(0.5880), 'mar_large': tensor(0.5554), 'map_per_class': tensor(-1.), 'mar_100_per_class': tensor(-1.)}
+result_bbox MAP: 
+{'map': tensor(0.4922), 'map_50': tensor(0.6926), 'map_75': tensor(0.5645), 'map_small': tensor(0.1050), 'map_medium': tensor(0.3816), 'map_large': tensor(0.4477), 'mar_1': tensor(0.5938), 'mar_10': tensor(0.6667), 'mar_100': tensor(0.6678), 'mar_small': tensor(0.2822), 'mar_medium': tensor(0.5772), 'mar_large': tensor(0.6134), 'map_per_class': tensor(-1.), 'mar_100_per_class': tensor(-1.)}
+
+SGD V2 FINETUNING 10 EPOCHE BATCH 16 SI ACCESSORI LR 1e-3
+result_mask MAP: 
+{'map': tensor(0.4636), 'map_50': tensor(0.7309), 'map_75': tensor(0.5077), 'map_small': tensor(0.1475), 'map_medium': tensor(0.4143), 'map_large': tensor(0.4543), 'mar_1': tensor(0.5574), 'mar_10': tensor(0.6177), 'mar_100': tensor(0.6184), 'mar_small': tensor(0.2997), 'mar_medium': tensor(0.5876), 'mar_large': tensor(0.5576), 'map_per_class': tensor([0.5288, 0.3853, 0.2028, 0.1822, 0.4022, 0.5076, 0.5189, 0.7335, 0.4507,
+        0.6374, 0.6212, 0.5950, 0.2604]), 'mar_100_per_class': tensor([0.6499, 0.5012, 0.4914, 0.4098, 0.5585, 0.6951, 0.5792, 0.8086, 0.6402,
+        0.7540, 0.8288, 0.6832, 0.4390])}
+result_bbox MAP: 
+{'map': tensor(0.4878), 'map_50': tensor(0.7077), 'map_75': tensor(0.5633), 'map_small': tensor(0.1089), 'map_medium': tensor(0.3774), 'map_large': tensor(0.4484), 'mar_1': tensor(0.5835), 'mar_10': tensor(0.6504), 'mar_100': tensor(0.6515), 'mar_small': tensor(0.2798), 'mar_medium': tensor(0.5649), 'mar_large': tensor(0.5964), 'map_per_class': tensor([0.6105, 0.4667, 0.1309, 0.1480, 0.5625, 0.5084, 0.5884, 0.7290, 0.4462,
+        0.5994, 0.5889, 0.6953, 0.2669]), 'mar_100_per_class': tensor([0.7264, 0.6110, 0.3753, 0.4070, 0.7108, 0.7100, 0.6634, 0.8121, 0.6723,
+        0.7234, 0.7963, 0.7688, 0.4924])}
+
+
+SGD V1 FINETUNING 10 EPOCHE BATCH 16 NO ACCESSORI LR 1e-3
+result_mask MAP: 
+{'map': tensor(0.4056), 'map_50': tensor(0.6668), 'map_75': tensor(0.4336), 'map_small': tensor(0.1188), 'map_medium': tensor(0.3535), 'map_large': tensor(0.3721), 'mar_1': tensor(0.5098), 'mar_10': tensor(0.5722), 'mar_100': tensor(0.5729), 'mar_small': tensor(0.2583), 'mar_medium': tensor(0.5418), 'mar_large': tensor(0.5005), 'map_per_class': tensor([0.4379, 0.3201, 0.1955, 0.1559, 0.3224, 0.4501, 0.4845, 0.6995, 0.3939,
+        0.5933, 0.5665, 0.5272, 0.1262]), 'mar_100_per_class': tensor([0.5805, 0.4557, 0.4685, 0.3776, 0.4949, 0.6423, 0.5534, 0.7800, 0.5915,
+        0.7358, 0.8011, 0.6454, 0.3218])}
+result_bbox MAP: 
+{'map': tensor(0.4271), 'map_50': tensor(0.6529), 'map_75': tensor(0.4835), 'map_small': tensor(0.0748), 'map_medium': tensor(0.3228), 'map_large': tensor(0.3764), 'mar_1': tensor(0.5329), 'mar_10': tensor(0.6089), 'mar_100': tensor(0.6102), 'mar_small': tensor(0.1807), 'mar_medium': tensor(0.5213), 'mar_large': tensor(0.5482), 'map_per_class': tensor([0.4723, 0.3697, 0.1093, 0.1381, 0.5263, 0.4720, 0.5387, 0.6956, 0.4040,
+        0.5547, 0.5231, 0.6093, 0.1388]), 'mar_100_per_class': tensor([0.6379, 0.5401, 0.3540, 0.3895, 0.6888, 0.6902, 0.6199, 0.7843, 0.6312,
+        0.6985, 0.7562, 0.7202, 0.4218])}
+
+SGD V1 FINETUNING 10 EPOCHE BATCH 16 SI ACCESSORI LR 1e-3
+result_mask MAP: 
+{'map': tensor(0.4118), 'map_50': tensor(0.6820), 'map_75': tensor(0.4391), 'map_small': tensor(0.1303), 'map_medium': tensor(0.3585), 'map_large': tensor(0.3659), 'mar_1': tensor(0.5121), 'mar_10': tensor(0.5774), 'mar_100': tensor(0.5784), 'mar_small': tensor(0.2689), 'mar_medium': tensor(0.5483), 'mar_large': tensor(0.5186), 'map_per_class': tensor(-1.), 'mar_100_per_class': tensor(-1.)}
+result_bbox MAP: 
+{'map': tensor(0.4219), 'map_50': tensor(0.6661), 'map_75': tensor(0.4759), 'map_small': tensor(0.0761), 'map_medium': tensor(0.3211), 'map_large': tensor(0.3713), 'mar_1': tensor(0.5243), 'mar_10': tensor(0.5973), 'mar_100': tensor(0.5993), 'mar_small': tensor(0.1819), 'mar_medium': tensor(0.5122), 'mar_large': tensor(0.5424), 'map_per_class': tensor(-1.), 'mar_100_per_class': tensor(-1.)}
+Finished Training
+
+

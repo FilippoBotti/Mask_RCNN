@@ -105,6 +105,7 @@ def get_args():
 
     parser.add_argument('--lr', type=float, default=1e-5, help='learning rate')
     parser.add_argument('--opt', type=str, default='Adam', choices=['SGD', 'Adam'], help = 'optimizer used for training')
+    parser.add_argument('--device', type=str, default='cpu', choices=['cpu', 'cuda'], help = 'Select device cpu or cuda')
 
     parser.add_argument('--dataset_path', type=str, default='./ModaNetDatasets', help='path were to save/get the dataset')
     parser.add_argument('--checkpoint_path', type=str, default='./', help='path where to save the trained model')
@@ -114,6 +115,7 @@ def get_args():
     parser.add_argument('--pretrained', type=bool, default=False, help='load pretrained coco weights.')
     parser.add_argument('--version', type=str, default='V1', choices=['V1', 'V2'], help = 'maskrcnn version (V1 or improved V2)')
     parser.add_argument('--cls_accessory', action='store_true', help='Add a binary classifier for the accessories')
+    parser.add_argument('--change_anchors', action='store_true', help='Change anchors')
 
     parser.add_argument('--manual_seed', type=bool, default=True, help='Use same random seed to get same train/valid/test sets for every training.')
 
@@ -123,7 +125,7 @@ def get_args():
 
 def main(args):
     model = Mask_RCNN(len(CLASSES), args=args)
-    model.load_state_dict(torch.load(args.checkpoint_path, map_location=torch.device('cpu')))
+    model.load_state_dict(torch.load(args.checkpoint_path, map_location=torch.device(args.device)))
     model.eval()
 
 
@@ -141,7 +143,7 @@ def main(args):
             print("Can't receive frame (stream end?). Exiting ...")
             break
         i+=1
-        if i % 60 == 0:
+        if i % 30 == 0:
             transform = get_transform()
             frame = transform(frame)
             pred = model([frame])
