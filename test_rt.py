@@ -126,6 +126,7 @@ def get_args():
 def main(args):
     model = Mask_RCNN(len(CLASSES), args=args)
     model.load_state_dict(torch.load(args.checkpoint_path, map_location=torch.device(args.device)))
+    model.to(args.device)
     model.eval()
 
 
@@ -146,7 +147,7 @@ def main(args):
         if i % 30 == 0:
             transform = get_transform()
             frame = transform(frame)
-            pred = model([frame])
+            pred = model([frame.to(args.device)])
             mask = visualize_mask(frame,pred)
             bbox = visualize_bbox(frame,pred,CLASSES)
             cv2.namedWindow('mask',cv2.WINDOW_NORMAL)
